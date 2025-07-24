@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Mac-specific
+.DS_Store
+
+# Django static/media
+/static/
+/media/
+
+# VSCode (optional)
+.vscode/
+
+# Migrations (optional, if you want to exclude them at first)
+*/migrations/
