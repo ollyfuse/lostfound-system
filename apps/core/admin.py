@@ -1,3 +1,8 @@
 from django.contrib import admin
+from .models import UserContactInfo, DocumentType, LostDocument, FoundDocument, MatchNotification
 
-# Register your models here.
+admin.site.register(UserContactInfo)
+admin.site.register(DocumentType)
+admin.site.register(LostDocument)
+admin.site.register(FoundDocument)
+admin.site.register(MatchNotification)
