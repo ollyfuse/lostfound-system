@@ -1,0 +1,75 @@
+{% load static %}
+
+<div class="container mx-auto px-4 py-6">
+
+    {% if documents %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
+            {% for doc in documents  %}
+                <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition">
+                    <h3 class="font-semibold text-lg mb-1">{{ doc.document_type }}</h3>
+                    <p class="text-sm text-gray-600">Owner: {{ doc.name_on_document|default:"N/A" }}</p>
+                    {% if doc.document_number %}
+                        <p class="text-sm text-gray-500">Document Number: <strong>{{ doc.document_number|truncatechars:6|slice:'::-1' }}</strong></p>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">
+                        Found on: {{ doc.found_date|date:"F j, Y"}}<br>
+                        Contact: {{ doc.contact_info.phone_number }}
+                    </p>
+                    {% if doc.image %}
+                        <img src="{{ doc.image.url }}" alt="Document Image" class="w-full mt-2 rounded shadow-sm">
+                    {% endif %}
+                    <span class="inline-block mt-3 text-sm font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                        {{ doc.is_approved }}
+                    </span>
+                    <button class="block mt-4 w-full border rounded py-2 text-sm font-medium hover:bg-gray-100">
+                        👁️ View Details
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination controls -->
+        <div class="mt-6 flex flex-wrap justify-center items-center gap-3">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Previous</a>
+            {% endif %}
+
+            <span class="px-4 py-2 bg-gray-300 rounded">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Next →</a>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <p class="text-center text-gray-500 mt-6">No found documents available at the moment.</p>
+    {% endif %}
+
+</div>
+
+
+
+<!-- <h1 class="text-2xl font-bold mb-4">Found Documents</h1>
+
+{% if documents %}
+  <ul class="space-y-4">
+    {% for doc in documents %}
+      <li class="p-4 bg-gray-100 rounded-lg">
+        <strong>Name:</strong> {{ doc.name_on_document }}<br>
+        <strong>Type:</strong> {{ doc.document_type }}<br>
+        <strong>Document Number:</strong> {{ doc.document_number|default:"N/A" }}<br>
+        <strong>Found on:</strong> {{ doc.found_date|date:"F j, Y" }}<br>
+        <strong>Contact:</strong> {{ doc.contact_info.phone_number }}<br>
+
+        {% if doc.image %}
+          <img src="{{ doc.image.url }}" alt="Document Image" class="w-32 mt-2">
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-red-500">No found documents available at the moment.</p>
+{% endif %} -->
+

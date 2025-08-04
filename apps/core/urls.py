@@ -1,8 +1,11 @@
 from django.urls import path
 from . import views
 
-app_name = 'core'
 
 urlpatterns = [
-    path('found-documents/', views.found_documents_list, name='found_documents_list'),
+    path('', views.home, name='home'),
+    path('report/', views.report_document, name='report'),
+    path('upload/', views.upload_document, name='upload'),
+    path('', views.found_documents, name='found_documents_list'),
+    # path('upload/', views.upload_found_document, name='upload_found_document'),
 ]
