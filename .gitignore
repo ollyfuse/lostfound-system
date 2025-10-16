@@ -1,23 +1,39 @@
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+*.db
 *.sqlite3
 
-# Virtual environment
-venv/
+# Django
+media/
+staticfiles/
+*.log
 
-# Environment variables
-.env
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Mac-specific
+# React/Vite
+frontend/dist/
+frontend/build/
 .DS_Store
-
-# Django static/media
-/static/
-/media/
-
-# VSCode (optional)
 .vscode/
+.idea/
 
-# Migrations (optional, if you want to exclude them at first)
-*/migrations/
+# Docker
+.dockerignore
+
+# OS
+Thumbs.db

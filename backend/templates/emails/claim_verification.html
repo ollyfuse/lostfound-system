@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#f6f8fb; padding:30px;}
+    .card { background:#fff; padding:20px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); max-width: 600px; margin: 0 auto; }
+    .cta { display:inline-block; padding:12px 18px; background:#48f186; color:#000000; border-radius:6px; text-decoration:none; }
+    .small { color:#6b7280; font-size:13px; margin-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Verify your claim</h2>
+    <p>Click the button below to verify your claim for report <strong>#{{ report_id }}</strong> ({{ report_type }}).</p>
+    <a class="cta" href="{{ verify_url }}">Verify Claim</a>
+    <p class="small">This link expires in {{ expires_hours }} hours. If you didn't request this, ignore this email.</p>
+  </div>
+</body>
+</html>

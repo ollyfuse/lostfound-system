@@ -1,0 +1,10 @@
+Django>=4.2
+djangorestframework
+psycopg2-binary
+django-cors-headers
+celery[redis]
+python-dotenv
+djangorestframework-simplejwt
+gunicorn
+Pillow
+django-filter
