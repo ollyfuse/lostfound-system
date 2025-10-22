@@ -191,3 +191,8 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = f"Lost & Found System <{EMAIL_HOST_USER}>" if EMAIL_HOST_USER else "noreply@lostfound.com"
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+# MTN MoMo Configuration
+MTN_API_USER = os.getenv('MTN_API_USER', '')
+MTN_API_KEY = os.getenv('MTN_API_KEY', '')
+MTN_SUBSCRIPTION_KEY = os.getenv('MTN_SUBSCRIPTION_KEY', '')

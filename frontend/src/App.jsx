@@ -5,8 +5,9 @@ import LostDocumentForm from "./components/LostDocumentForm";
 import FoundDocumentForm from "./components/FoundDocumentForm";
 import DocumentCard from "./components/DocumentCard";
 import PublicDocuments from "./pages/PublicDocuments";
-import VerifyClaim from "./pages/VerifyClaim";
+import DocumentDetails from "./pages/DocumentDetail"; // Your payment-gated component
 import axiosClient from "./api/axiosClient";
+import Footer from "./components/Footer";
 
 function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery }) {
   const [results, setResults] = useState({ lost: [], found: [] });
@@ -170,6 +171,23 @@ function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("browse");
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+  const [stats, setStats] = useState({
+  total_matched: 250,
+  total_lost: 500,
+  success_rate: 98
+});
+  useEffect(() => {
+      const fetchStats = async () => {
+        try {
+          const response = await axiosClient.get('stats/');
+          setStats(response.data);
+        } catch (error) {
+          console.error('Failed to fetch stats:', error);
+        }
+      };
+
+      fetchStats();
+    }, []);
 
   const handleSearchFocus = () => {
     setShowSearchOverlay(true);
@@ -183,7 +201,7 @@ function HomePage() {
   const renderContent = () => {
     switch (activeTab) {
       case "browse":
-        return <PublicDocuments />;
+        return <PublicDocuments onTabChange={handleTabChange}/>;
       case "report-lost":
         return (
           <div className="max-w-2xl mx-auto">
@@ -208,12 +226,21 @@ function HomePage() {
           </div>
         );
       default:
-        return <PublicDocuments />;
+        return <PublicDocuments onTabChange={handleTabChange}/>;
     }
   };
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+     setTimeout(() => {
+      const contentSection = document.querySelector('#content-section');
+      if (contentSection) {
+        contentSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   };
 
   return (
@@ -315,7 +342,7 @@ function HomePage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800">250+</h3>
+              <h3 className="text-2xl font-semibold text-gray-800">{stats.total_matched}+</h3>
               <p className="text-gray-600">Documents Reunited</p>
             </div>
 
@@ -327,8 +354,8 @@ function HomePage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800">500+</h3>
-              <p className="text-gray-600">Active Users</p>
+              <h3 className="text-2xl font-semibold text-gray-800">{stats.total_lost + stats.total_found}+</h3>
+              <p className="text-gray-600">Active Documents</p>
             </div>
 
             <div>
@@ -339,7 +366,7 @@ function HomePage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800">98%</h3>
+              <h3 className="text-2xl font-semibold text-gray-800">{stats.success_rate}%</h3>
               <p className="text-gray-600">Success Rate</p>
             </div>
           </div>
@@ -384,7 +411,7 @@ function HomePage() {
         </section>
 
         {/* Dynamic Content Section */}
-        <section className="py-8">
+        <section id="content-section" className="py-8">
           {renderContent()}
         </section>
       </main>
@@ -396,6 +423,8 @@ function HomePage() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
+
+       <Footer />
     </div>
   );
 }
@@ -405,7 +434,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/verify" element={<VerifyClaim />} />
+        <Route path="/verify" element={<DocumentDetails />} />
       </Routes>
     </Router>
   );

@@ -1,45 +1,71 @@
 import { useState } from "react";
 import { Calendar, MapPin, Hash, Eye, MessageSquare } from "lucide-react";
 import ClaimForm from "./ClaimForm";
+import axiosClient from "../api/axiosClient";
 
-export default function DocumentCard({ document, type }) {
+export default function DocumentCard({ document, type, onTabChange }) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [verified, setVerified] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationInput, setVerificationInput] = useState("");
+  const [showUnblurred, setShowUnblurred] = useState(false);
+  const [unmaskedDocument, setUnmaskedDocument] = useState(null);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
   };
 
-  const handleVerification = () => {
-    if (verificationCode.toLowerCase() === "verify") {
-      setVerified(true);
-    } else {
-      alert("Invalid verification code. Use 'verify' for demo purposes.");
+  const handleVerification = async () => {
+    const input = verificationInput.trim();
+    
+    try {
+      const response = await axiosClient.post(`verify/${type}/${document.id}/`, {
+        verification_input: input
+      });
+      
+      if (response.data.verified) {
+        setVerified(true);
+        setShowUnblurred(true);
+        setUnmaskedDocument(response.data.document);
+        
+        setTimeout(() => {
+          setShowUnblurred(false);
+          setVerified(false);
+          setVerificationInput("");
+          setUnmaskedDocument(null);
+        }, 3000);
+      } else {
+        alert("Verification failed. Please enter the correct document number or owner name.");
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      alert("Verification failed. Please try again.");
     }
   };
 
+  const displayDocument = showUnblurred && unmaskedDocument ? unmaskedDocument : document;
+
   return (
     <>
-      <div className="bg-white rounded-xl shadow-md overflow-hidden border hover:shadow-lg transition-shadow">
-        {/* Blurred Image */}
+      {/* Professional Sized Card */}
+      <div className="bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+        {/* Image Section - Medium Size */}
         {document.image ? (
-          <div className="h-48 bg-gray-200 overflow-hidden relative">
+          <div className="h-48 bg-gray-100 overflow-hidden relative rounded-t-xl">
             <img 
               src={document.image} 
-              alt={`${type} document (blurred for privacy)`}
+              alt={`${type} document`}
               className="w-full h-full object-cover filter blur-sm"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-              <span className="bg-white bg-opacity-90 px-3 py-1 rounded-full text-xs font-medium">
+            <div className="absolute inset-0 bg-black bg-opacity-15 flex items-center justify-center">
+              <span className="bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-medium">
                 🔒 Blurred for Privacy
               </span>
             </div>
           </div>
         ) : (
-          <div className="h-48 bg-gray-100 flex items-center justify-center">
+          <div className="h-48 bg-gray-50 flex items-center justify-center rounded-t-xl">
             <div className="text-center text-gray-400">
               <div className="text-4xl mb-2">📄</div>
               <span className="text-sm">No Image Available</span>
@@ -47,13 +73,14 @@ export default function DocumentCard({ document, type }) {
           </div>
         )}
         
+        {/* Content Section */}
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
               type === 'found' 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-red-100 text-red-700'
             }`}>
               {type === 'found' ? '📄 Found' : '🔍 Lost'}
             </span>
@@ -68,14 +95,14 @@ export default function DocumentCard({ document, type }) {
             {document.document_type?.name || document.document_type || "N/A"}
           </h3>
 
-          {/* Document Details */}
+          {/* Key Details */}
           <div className="space-y-2 text-sm text-gray-600 mb-4">
             <div className="flex items-center">
               <span className="font-medium w-16">Name:</span>
-              <span className="flex-1">
+              <span className="flex-1 truncate">
                 {type === 'found' 
-                  ? (document.finder_name || "N/A")
-                  : (document.owner_name || "N/A")
+                  ? (displayDocument.found_name || displayDocument.finder_name || "N/A")
+                  : (displayDocument.Owner_name || displayDocument.owner_name || "N/A")
                 }
               </span>
             </div>
@@ -83,56 +110,33 @@ export default function DocumentCard({ document, type }) {
             <div className="flex items-center">
               <Hash className="w-3 h-3 mr-1" />
               <span className="font-medium w-15">Number:</span>
-              <span className="flex-1">
+              <span className="flex-1 truncate">
                 {document.document_number || "N/A"}
               </span>
             </div>
 
-            {/* Location for found documents */}
-            {type === 'found' && (
-              <div className="flex items-center">
-                <MapPin className="w-3 h-3 mr-1" />
-                <span className="font-medium w-15">Found at:</span>
-                <span className="flex-1">
-                  {document.where_found || "N/A"}
-                </span>
-              </div>
-            )}
-
-            {/* Location for lost documents */}
-            {type === 'lost' && (
-              <div className="flex items-center">
-                <MapPin className="w-3 h-3 mr-1" />
-                <span className="font-medium w-15">Lost at:</span>
-                <span className="flex-1">
-                  {document.where_lost || "N/A"}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center">
+              <MapPin className="w-3 h-3 mr-1" />
+              <span className="font-medium w-15">
+                {type === 'found' ? 'Found at:' : 'Lost at:'}
+              </span>
+              <span className="flex-1 truncate">
+                {type === 'found' 
+                  ? (document.where_found || "N/A")
+                  : (document.where_lost || "N/A")
+                }
+              </span>
+            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-2">
-            <button
-              onClick={() => setShowDetailsModal(true)}
-              className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition text-sm flex items-center justify-center space-x-2"
-            >
-              <Eye className="w-4 h-4" />
-              <span>View Full Details</span>
-            </button>
-            
-            {/* <button
-              onClick={() => setShowClaimModal(true)}
-              className={`w-full py-2 px-4 rounded-lg transition text-sm flex items-center justify-center space-x-2 ${
-                type === 'found'
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-red-600 hover:bg-red-700 text-white'
-              }`}
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>{type === 'found' ? 'Claim This Document' : 'I Found This'}</span>
-            </button> */}
-          </div>
+          {/* Action Button */}
+          <button
+            onClick={() => setShowDetailsModal(true)}
+            className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition text-sm font-medium flex items-center justify-center space-x-2"
+          >
+            <Eye className="w-4 h-4" />
+            <span>View Full Details</span>
+          </button>
         </div>
       </div>
 
@@ -153,7 +157,7 @@ export default function DocumentCard({ document, type }) {
 
               {document.image && (
                 <div className="mb-6">
-                  {!verified ? (
+                  {!showUnblurred ? (
                     <div className="h-64 bg-gray-200 relative rounded-lg overflow-hidden">
                       <img 
                         src={document.image} 
@@ -165,13 +169,13 @@ export default function DocumentCard({ document, type }) {
                           <div className="text-3xl mb-3">🔒</div>
                           <h3 className="font-semibold mb-2">Verification Required</h3>
                           <p className="text-sm text-gray-600 mb-3">
-                            Enter verification code to view original image
+                            Enter the document number or owner name to verify ownership
                           </p>
                           <input
                             type="text"
-                            placeholder="Enter code (use 'verify')"
-                            value={verificationCode}
-                            onChange={(e) => setVerificationCode(e.target.value)}
+                            placeholder="Document number or owner name"
+                            value={verificationInput}
+                            onChange={(e) => setVerificationInput(e.target.value)}
                             className="w-full border rounded px-3 py-2 mb-3 text-sm"
                           />
                           <button
@@ -184,12 +188,15 @@ export default function DocumentCard({ document, type }) {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-64 bg-gray-200 rounded-lg overflow-hidden">
+                    <div className="h-64 bg-gray-200 rounded-lg overflow-hidden relative">
                       <img 
                         src={document.image} 
                         alt="Document"
                         className="w-full h-full object-cover"
                       />
+                      <div className="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded text-sm">
+                        ✓ Verified - Auto-hiding in 3s
+                      </div>
                     </div>
                   )}
                 </div>
@@ -203,12 +210,12 @@ export default function DocumentCard({ document, type }) {
                     {type === 'found' ? '📄 Found Document' : '🔍 Lost Document'}
                   </span>
                   <span className="text-sm text-gray-500">
-                    {formatDate(document.created_at)}
+                    {formatDate(displayDocument.created_at)}
                   </span>
                 </div>
 
                 <h3 className="text-xl font-bold text-gray-800">
-                  {document.document_type?.name || document.document_type || "N/A"}
+                  {displayDocument.document_type?.name || displayDocument.document_type || "N/A"}
                 </h3>
 
                 <div className="grid grid-cols-1 gap-3">
@@ -216,15 +223,15 @@ export default function DocumentCard({ document, type }) {
                     <span className="font-medium text-gray-700">Name:</span>
                     <span className="ml-2 text-gray-600">
                       {type === 'found' 
-                        ? (document.finder_name || "N/A")
-                        : (document.owner_name || "N/A")
+                        ? (displayDocument.found_name || displayDocument.finder_name || "N/A")
+                        : (displayDocument.Owner_name || displayDocument.owner_name || "N/A")
                       }
                     </span>
                   </div>
                   
                   <div>
                     <span className="font-medium text-gray-700">Document Number:</span>
-                    <span className="ml-2 text-gray-600">{document.document_number || "N/A"}</span>
+                    <span className="ml-2 text-gray-600">{displayDocument.document_number || "N/A"}</span>
                   </div>
 
                   <div>
@@ -233,8 +240,8 @@ export default function DocumentCard({ document, type }) {
                     </span>
                     <span className="ml-2 text-gray-600">
                       {type === 'found' 
-                        ? (document.where_found || "N/A")
-                        : (document.where_lost || "N/A")
+                        ? (displayDocument.where_found || "N/A")
+                        : (displayDocument.where_lost || "N/A")
                       }
                     </span>
                   </div>
@@ -245,16 +252,16 @@ export default function DocumentCard({ document, type }) {
                     </span>
                     <span className="ml-2 text-gray-600">
                       {type === 'found' 
-                        ? formatDate(document.when_found)
-                        : formatDate(document.when_lost)
+                        ? formatDate(displayDocument.when_found)
+                        : formatDate(displayDocument.when_lost)
                       }
                     </span>
                   </div>
 
-                  {document.description && (
+                  {displayDocument.description && (
                     <div>
                       <span className="font-medium text-gray-700">Description:</span>
-                      <p className="mt-1 text-gray-600">{document.description}</p>
+                      <p className="mt-1 text-gray-600">{displayDocument.description}</p>
                     </div>
                   )}
                 </div>
@@ -262,7 +269,11 @@ export default function DocumentCard({ document, type }) {
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
-                    setShowClaimModal(true);
+                    if (type === 'lost') {
+                      onTabChange('upload-found');
+                    } else {
+                      setShowClaimModal(true);
+                    }
                   }}
                   className={`w-full py-3 px-4 rounded-lg transition font-medium ${
                     type === 'found'
@@ -299,8 +310,8 @@ export default function DocumentCard({ document, type }) {
                 </h3>
                 <p className="text-sm text-gray-600">
                   {type === 'found' 
-                    ? (document.finder_name || "N/A")
-                    : (document.owner_name || "N/A")
+                    ? (document.found_name || "N/A")
+                    : (document.Owner_name || "N/A")
                   }
                 </p>
               </div>

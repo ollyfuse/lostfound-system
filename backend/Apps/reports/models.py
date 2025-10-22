@@ -2,6 +2,7 @@ from django.db import models
 from PIL import Image, ImageFilter
 from io import BytesIO
 from django.core.files.base import ContentFile
+import uuid
 
 def make_blurred_copy(image_file):
     image_file.seek(0)
@@ -49,7 +50,7 @@ class LostDocument(models.Model):
         super().save(*args, **kwargs)
         if is_new:
             from core.tasks import check_and_notify_matches
-            check_and_notify_matches.delay(lost_doc_id=self.id)
+            check_and_notify_matches.delay(lost_doc_id=self.id) # type: ignore
     
 
 class FoundDocument(models.Model):
@@ -86,4 +87,38 @@ class FoundDocument(models.Model):
         
         if is_new:
             from core.tasks import check_and_notify_matches
-            check_and_notify_matches.delay(found_doc_id=self.id)
+            check_and_notify_matches.delay(found_doc_id=self.id) # type: ignore
+
+
+# --------------------------------
+# Payment Models
+# --------------------------------
+
+class Payment(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('SUCCESSFUL', 'Successful'),
+        ('FAILED', 'Failed'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    momo_reference_id = models.CharField(max_length=100, unique=True)
+    phone_number = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='RWF')
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Payment {self.momo_reference_id} - {self.status}"
+    
+class ContactAccess(models.Model):
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
+    report_type = models.CharField(max_length=10)
+    report_id = models.IntegerField()
+    user_email = models.EmailField()
+    accessed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Access for {self.report_type} {self.report_id}"

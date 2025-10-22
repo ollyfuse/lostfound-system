@@ -78,14 +78,23 @@ def check_and_notify_matches(found_doc_id=None, lost_doc_id=None):
         if not lost_doc.contact.email:
             continue
 
+        # Create verification token for this match
+        from .models import VerificationToken
+        vt = VerificationToken.objects.create(
+            report_type="found",
+            report_id=current_found_doc.id,
+            contact_email=lost_doc.contact.email,
+            contact_phone=""  # Not needed for automatic matches
+        )
+         # Build verification URL
+        verification_link = f"{settings.FRONTEND_URL}/verify?token={vt.token}"
+
         # Render HTML template
         context = {
             "owner_name": lost_doc.Owner_name,
             "document_type": lost_doc.document_type.name,
             "document_number": lost_doc.document_number,
-            "finder_name": current_found_doc.contact.full_name,
-            "finder_phone": current_found_doc.contact.phone,
-            "finder_email": current_found_doc.contact.email,
+            "verification_link": verification_link,
         }
         
         subject = f"Good News: Your {context['document_type']} has been found!"

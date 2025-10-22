@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { Search, Filter, Calendar } from "lucide-react";
+import { Search, Filter, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import axiosClient from "../api/axiosClient";
 import DocumentCard from "../components/DocumentCard";
 
-export default function PublicDocuments() {
+export default function PublicDocuments({onTabChange}) {
   const [lostDocs, setLostDocs] = useState([]);
   const [foundDocs, setFoundDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("found");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -27,6 +29,36 @@ export default function PublicDocuments() {
 
     fetchDocuments();
   }, []);
+
+  // Reset to page 1 when switching tabs
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  // Get current documents based on active tab
+  const currentDocs = activeTab === "found" ? foundDocs : lostDocs;
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(currentDocs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = currentDocs.slice(startIndex, endIndex);
+
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
+
+  const goToPrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   if (loading) {
     return (
@@ -50,35 +82,6 @@ export default function PublicDocuments() {
           Browse recently reported and found documents. Personal information is protected for privacy.
         </p>
       </div>
-
-      {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <div className="bg-green-100 p-2 rounded-full">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-green-800">Found Documents</h3>
-              <p className="text-2xl font-bold text-green-600">{foundDocs.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <div className="bg-red-100 p-2 rounded-full">
-              <Search className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-red-800">Lost Reports</h3>
-              <p className="text-2xl font-bold text-red-600">{lostDocs.length}</p>
-            </div>
-          </div>
-        </div>
-      </div> */}
 
       {/* Tabs */}
       <div className="flex justify-center mb-8">
@@ -118,21 +121,76 @@ export default function PublicDocuments() {
         </div>
       </div>
 
-      {/* Documents Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {activeTab === "found" &&
-          foundDocs.map((doc) => (
-            <DocumentCard key={doc.id} document={doc} type="found" />
-          ))}
-        {activeTab === "lost" &&
-          lostDocs.map((doc) => (
-            <DocumentCard key={doc.id} document={doc} type="lost" />
-          ))}
-      </div>
+      {/* Documents Grid - 3x2 Layout */}
+      <div className="max-w-6xl mx-auto px-1">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    {currentItems.map((doc) => (
+      <DocumentCard 
+        key={doc.id} 
+        document={doc} 
+        type={activeTab} 
+        onTabChange={onTabChange}
+      />
+    ))}
+  </div>
+</div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-2 mb-8">
+          <button
+            onClick={goToPrevious}
+            disabled={currentPage === 1}
+            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition ${
+              currentPage === 1
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+            }`}
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Previous
+          </button>
+
+          <div className="flex space-x-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => goToPage(page)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  currentPage === page
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={goToNext}
+            disabled={currentPage === totalPages}
+            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition ${
+              currentPage === totalPages
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+            }`}
+          >
+            Next
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </button>
+        </div>
+      )}
+
+      {/* Pagination Info */}
+      {currentDocs.length > 0 && (
+        <div className="text-center text-sm text-gray-500 mb-8">
+          Showing {startIndex + 1}-{Math.min(endIndex, currentDocs.length)} of {currentDocs.length} documents
+        </div>
+      )}
 
       {/* Empty State */}
-      {((activeTab === "found" && foundDocs.length === 0) ||
-        (activeTab === "lost" && lostDocs.length === 0)) && (
+      {currentDocs.length === 0 && (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">
             {activeTab === "found" ? "📄" : "🔍"}

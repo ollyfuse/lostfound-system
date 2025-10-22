@@ -4,7 +4,11 @@ from .views import (
     LostDocumentCreateView,
     FoundDocumentCreateView,
     LostDocumentListView,
-    FoundDocumentListView
+    FoundDocumentListView,
+    DocumentVerificationView,
+    DocumentStatsView,
+    request_payment,
+    check_payment_status
 )
 
 urlpatterns = [
@@ -14,5 +18,12 @@ urlpatterns = [
 
     path("lost/search/", LostDocumentListView.as_view(), name="lost-search"),
     path("found/search/", FoundDocumentListView.as_view(), name="found-search"),
+
+    path('verify/<str:document_type>/<int:document_id>/', DocumentVerificationView.as_view(), name='document-verification'),
+
+    path('stats/', DocumentStatsView.as_view(), name='document-stats'),
+     # Payment URLs
+    path('payment/request/', request_payment, name='request-payment'),
+    path('payment/status/<uuid:payment_id>/', check_payment_status, name='check-payment-status'),
 
 ]
