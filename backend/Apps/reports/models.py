@@ -42,6 +42,10 @@ class LostDocument(models.Model):
     contact = models.ForeignKey(UserContactInfo, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    is_premium = models.BooleanField(default=False)
+    premium_expires_at = models.DateTimeField(blank=True, null=True)
+    premium_payment = models.ForeignKey('Payment', null=True, blank=True, on_delete=models.SET_NULL, related_name='premium_lost_documents')
+
     def __str__(self):
         return f"{self.Owner_name} - {self.document_type.name}"
     

@@ -13,7 +13,7 @@ class UserContactInfoAdmin(admin.ModelAdmin):
 
 @admin.register(LostDocument)
 class LostDocumentAdmin(admin.ModelAdmin):
-    list_display = ['Owner_name', 'document_type', 'document_number','contact', 'created_at']
+    list_display = ['Owner_name', 'document_type', 'document_number','contact', 'created_at', 'is_premium', 'premium_expires_at', 'premium_payment']
     list_filter = ['document_type', 'created_at']
     search_fields = ['Owner_name', 'document_number']
 

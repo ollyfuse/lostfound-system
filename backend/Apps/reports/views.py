@@ -32,11 +32,33 @@ class FoundDocumentCreateView(generics.ListCreateAPIView):
     serializer_class = FoundDocumentSerializer
 
 class LostDocumentListView(generics.ListAPIView):
-    queryset = LostDocument.objects.all().order_by("-created_at")
     serializer_class = LostDocumentPublicSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["document_type"]
     search_fields = ["Owner_name", "document_number"]
+
+    def get_queryset(self):
+        from django.utils import timezone
+        from django.db.models import Case, When, BooleanField
+        
+        # Clean up expired premium documents first
+        LostDocument.objects.filter(
+            is_premium=True,
+            premium_expires_at__lt=timezone.now()
+        ).update(is_premium=False, premium_expires_at=None)
+        
+        # Return queryset with premium documents first
+        return LostDocument.objects.annotate(
+            is_active_premium=Case(
+                When(
+                    is_premium=True,
+                    premium_expires_at__gt=timezone.now(),
+                    then=True
+                ),
+                default=False,
+                output_field=BooleanField()
+            )
+        ).order_by('-is_active_premium', '-created_at')
 
 class FoundDocumentListView(generics.ListAPIView):
     queryset = FoundDocument.objects.all().order_by("-created_at")
@@ -118,19 +140,14 @@ class DocumentStatsView(View):
 def request_payment(request):
     """Request payment for contact access"""
     try:
-        print(f"Request data: {request.data}")  # Debug log
-
         phone_number = request.data.get('phone_number')
         report_type = request.data.get('report_type')  
         report_id = request.data.get('report_id')
         user_email = request.data.get('user_email')
-
-        print(f"Parsed data: phone={phone_number}, type={report_type}, id={report_id}, email={user_email}")  # Debug log
         
         if not all([phone_number, report_type, report_id, user_email]):
             return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create payment record
         reference_id = str(uuid.uuid4())
         payment = Payment.objects.create(
             momo_reference_id=reference_id,
@@ -139,16 +156,12 @@ def request_payment(request):
             currency='EUR'
         )
 
-        print(f"Created payment record: {payment.id}")  # Debug log
         
         # Request payment from MTN MoMo
         momo_service = MTNMoMoService()
         result = momo_service.request_payment(phone_number, 2000, reference_id)
-
-        print(f"MoMo service result: {result}")  # Debug log
         
         if result['success']:
-            # Store access info for later
             ContactAccess.objects.create(
                 payment=payment,
                 report_type=report_type,
@@ -167,7 +180,6 @@ def request_payment(request):
             return Response({'error': result['error']}, status=status.HTTP_400_BAD_REQUEST)
             
     except Exception as e:
-        print(f"Exception in request_payment: {e}")  # Debug log
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
@@ -201,3 +213,103 @@ def check_payment_status(request, payment_id):
         return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['POST'])
+def upgrade_to_premium(request):
+    """ Upgrade lost document to premium listing """
+    try:
+        # Get request data
+        lost_doc_id = request.data.get('lost_doc_id')
+        verification_input = request.data.get('verification_input', '').strip()
+        phone_number = request.data.get('phone_number')
+
+        if not all([lost_doc_id, verification_input, phone_number]):
+            return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get the lost document
+        try:
+            lost_doc = LostDocument.objects.get(id=lost_doc_id)
+        except LostDocument.DoesNotExist:
+            return Response({'error': 'Lost document not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Verify ownership (owner name or document number)
+        owner_name = lost_doc.Owner_name.lower().strip()
+        doc_number = (lost_doc.document_number or '').lower().strip()
+        input_lower = verification_input.lower().strip()
+
+        if input_lower != owner_name and input_lower != doc_number:
+            return Response({'error': 'Verification failed'}, status=status.HTTP_403_FORBIDDEN)
+        
+        #  Check if already premium and not expired
+        from django.utils import timezone
+        if lost_doc.is_premium and lost_doc.premium_expires_at and lost_doc.premium_expires_at > timezone.now():
+            return Response({'error': 'Document is already premium'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Payment record for premium upgrade
+        reference_id = str(uuid.uuid4())
+        payment = Payment.objects.create(
+            momo_reference_id=reference_id,
+            phone_number=phone_number,
+            amount=500,
+            currency='EUR'
+        )
+
+        # Requesting payment from MTN MoMo
+        momo_service = MTNMoMoService()
+        result = momo_service.request_payment(phone_number, 500, reference_id)
+
+        if result['success']:
+            #  Store the payment reference in the document
+            lost_doc.premium_payment = payment
+            lost_doc.save()
+
+            return Response({
+                'success': True,
+                'payment_id': str(payment.id),
+                'message': 'Premium upgrade payment sent. check your phone for MoMo prompt.'
+            })
+        else:
+            payment.status = 'FAILED'
+            payment.save()
+            return Response({'error': result['error']}, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+def check_premium_payment(request,payment_id):
+    """ Check premium payment status and activate premium if successful """
+    try:
+        payment = Payment.objects.get(id=payment_id)
+
+        if payment.status == 'SUCCESSFUL':
+            return Response({'status': 'SUCCESSFUL', 'paid': True})
+        
+        # check with MTN MoMo
+        momo_service = MTNMoMoService()
+        result = momo_service.check_payment_status(payment.momo_reference_id)
+
+        if result['success'] and result['status'] == 'SUCCESSFUL':
+            payment.status = 'SUCCESSFUL'
+            payment.save()
+
+            # Activate premium for the document
+            lost_doc = payment.premium_lost_documents.first()
+            if lost_doc:
+                from django.utils import timezone
+                from datetime import timedelta
+
+                lost_doc.is_premium = True
+                lost_doc.premium_expires_at = timezone.now() + timedelta(days=7)
+                lost_doc.save()
+
+            return Response({'status': 'SUCCESSFUL', 'paid': True})
+        else:
+            return Response({'status': 'PENDING', 'paid': False})
+        
+    except Payment.DoesNotExist:
+        return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        

@@ -332,83 +332,171 @@ function HomePage() {
         </section>
 
         {/* === Statistics Section === */}
-        <section className="bg-green-200 py-6">
-          <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="flex justify-center mb-2">
-                <div className="bg-blue-100 p-4 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 1.1-.9 2-2 2s-2-.9-2-2m8 0c0 1.1-.9 2-2 2s-2-.9-2-2m0 10c4.418 0 8-3.582 8-8 0-4.418-3.582-8-8-8S4 8.582 4 13c0 4.418 3.582 8 8 8z" />
-                  </svg>
+        <section className="bg-gradient-to-r from-blue-600 to-green-600 py-8">
+          <div className="max-w-6xl mx-auto px-4">
+            {/* <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-white mb-3">Community Impact</h3>
+              <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+                Real results from our growing community of helpers reuniting people with their documents
+              </p>
+            </div> */}
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 text-center">
+              <div className="group">
+                <div className="flex justify-center mb-4">
+                  <div className="bg-white/20 backdrop-blur-sm p-5 rounded-full group-hover:bg-white/30 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
                 </div>
+                <h4 className="text-4xl font-bold text-white mb-2">{stats.total_matched}+</h4>
+                <p className="text-xl font-semibold text-white mb-1">Documents Reunited</p>
+                <p className="text-blue-100">Successfully returned to owners</p>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800">{stats.total_matched}+</h3>
-              <p className="text-gray-600">Documents Reunited</p>
+
+              <div className="group">
+                <div className="flex justify-center mb-4">
+                  <div className="bg-white/20 backdrop-blur-sm p-5 rounded-full group-hover:bg-white/30 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <h4 className="text-4xl font-bold text-white mb-2">{stats.total_lost + stats.total_found}+</h4>
+                <p className="text-xl font-semibold text-white mb-1">Active Reports</p>
+                <p className="text-blue-100">Community members helping</p>
+              </div>
+
+              <div className="group">
+                <div className="flex justify-center mb-4">
+                  <div className="bg-white/20 backdrop-blur-sm p-5 rounded-full group-hover:bg-white/30 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                </div>
+                <h4 className="text-4xl font-bold text-white mb-2">{stats.success_rate}%</h4>
+                <p className="text-xl font-semibold text-white mb-1">Success Rate</p>
+                <p className="text-blue-100">Documents successfully matched</p>
+              </div>
             </div>
 
-            <div>
-              <div className="flex justify-center mb-2">
-                <div className="bg-green-100 p-4 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 15c3.042 0 5.824 1.07 7.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+            {/* <div className="mt-12 text-center">
+              <div className="inline-flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4">
+                <div className="flex items-center gap-2 text-white">
+                  <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium">Live Platform</span>
                 </div>
+                <div className="w-px h-4 bg-white/30"></div>
+                <span className="text-white/90 text-sm">🔒 Privacy Protected</span>
+                <div className="w-px h-4 bg-white/30"></div>
+                <span className="text-white/90 text-sm">⚡ Instant Matching</span>
+                <div className="w-px h-4 bg-white/30"></div>
+                <span className="text-white/90 text-sm">🆓 Completely Free</span>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800">{stats.total_lost + stats.total_found}+</h3>
-              <p className="text-gray-600">Active Documents</p>
-            </div>
-
-            <div>
-              <div className="flex justify-center mb-2">
-                <div className="bg-pink-100 p-4 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-2xl font-semibold text-gray-800">{stats.success_rate}%</h3>
-              <p className="text-gray-600">Success Rate</p>
-            </div>
+            </div> */}
           </div>
         </section>
 
-        {/* === Navigation Tabs === */}
-        <section className="py-10 text-center">
-          <div className="max-w-4xl mx-auto">
-            <div className="inline-flex bg-gray-100 rounded-xl p-1">
-              <button 
-                onClick={() => handleTabChange("browse")}
-                className={`px-6 py-2 rounded-lg font-medium transition ${
-                  activeTab === "browse" 
-                    ? "bg-white shadow text-gray-800" 
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-              >
-                Browse
-              </button>
-              <button 
-                onClick={() => handleTabChange("report-lost")}
-                className={`px-6 py-2 rounded-lg font-medium transition ${
-                  activeTab === "report-lost" 
-                    ? "bg-white shadow text-gray-800" 
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-              >
-                Report Lost
-              </button>
-              <button 
-                onClick={() => handleTabChange("upload-found")}
-                className={`px-6 py-2 rounded-lg font-medium transition ${
-                  activeTab === "upload-found" 
-                    ? "bg-white shadow text-gray-800" 
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-              >
-                Upload Found
-              </button>
+
+      {/* === Enhanced Navigation Tabs === */}
+<section className="py-12 bg-white">
+  <div className="max-w-5xl mx-auto px-4">
+    <div className="text-center mb-8">
+      <h3 className="text-2xl font-bold text-gray-800 mb-2">What would you like to do?</h3>
+      <p className="text-gray-600">Choose an option below to get started</p>
+    </div>
+    
+    <div className="flex justify-center">
+      <div className="bg-gray-50 rounded-2xl p-2 shadow-inner border border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button 
+            onClick={() => handleTabChange("browse")}
+            className={`group flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-200 ${
+              activeTab === "browse" 
+                ? "bg-blue-600 text-white shadow-lg transform scale-105" 
+                : "text-gray-700 hover:bg-white hover:shadow-md"
+            }`}
+          >
+            <div className={`p-2 rounded-lg ${
+              activeTab === "browse" 
+                ? "bg-white/20" 
+                : "bg-blue-100 group-hover:bg-blue-200"
+            }`}>
+              <Search className={`w-5 h-5 ${
+                activeTab === "browse" ? "text-white" : "text-blue-600"
+              }`} />
             </div>
-          </div>
-        </section>
+            <div className="text-left">
+              <div className="font-semibold">Browse Documents</div>
+              <div className={`text-sm ${
+                activeTab === "browse" ? "text-blue-100" : "text-gray-500"
+              }`}>
+                View recent reports
+              </div>
+            </div>
+          </button>
+
+          <button 
+            onClick={() => handleTabChange("report-lost")}
+            className={`group flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-200 ${
+              activeTab === "report-lost" 
+                ? "bg-red-600 text-white shadow-lg transform scale-105" 
+                : "text-gray-700 hover:bg-white hover:shadow-md"
+            }`}
+          >
+            <div className={`p-2 rounded-lg ${
+              activeTab === "report-lost" 
+                ? "bg-white/20" 
+                : "bg-red-100 group-hover:bg-red-200"
+            }`}>
+              <FileText className={`w-5 h-5 ${
+                activeTab === "report-lost" ? "text-white" : "text-red-600"
+              }`} />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold">Report Lost</div>
+              <div className={`text-sm ${
+                activeTab === "report-lost" ? "text-red-100" : "text-gray-500"
+              }`}>
+                Missing document?
+              </div>
+            </div>
+          </button>
+
+          <button 
+            onClick={() => handleTabChange("upload-found")}
+            className={`group flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-200 ${
+              activeTab === "upload-found" 
+                ? "bg-green-600 text-white shadow-lg transform scale-105" 
+                : "text-gray-700 hover:bg-white hover:shadow-md"
+            }`}
+          >
+            <div className={`p-2 rounded-lg ${
+              activeTab === "upload-found" 
+                ? "bg-white/20" 
+                : "bg-green-100 group-hover:bg-green-200"
+            }`}>
+              <Upload className={`w-5 h-5 ${
+                activeTab === "upload-found" ? "text-white" : "text-green-600"
+              }`} />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold">Upload Found</div>
+              <div className={`text-sm ${
+                activeTab === "upload-found" ? "text-green-100" : "text-gray-500"
+              }`}>
+                Found something?
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 
         {/* Dynamic Content Section */}
         <section id="content-section" className="py-8">

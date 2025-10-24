@@ -56,11 +56,13 @@ class LostDocumentPublicSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     document_type = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.all())
+    is_premium = serializers.SerializerMethodField()
+    premium_expires_at = serializers.SerializerMethodField()
 
     class Meta:
         model = LostDocument
         fields = ("id", "document_type", "owner_name", "document_number", "where_lost", 
-                 "when_lost", "description","image", "created_at")
+                 "when_lost", "description", "image", "created_at", "is_premium", "premium_expires_at")
 
     def get_document_number(self, obj):
         return mask_string(obj.document_number)
@@ -74,10 +76,28 @@ class LostDocumentPublicSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.image.url)
         return None
 
+    def get_is_premium(self, obj):
+        """Check if document has active premium status"""
+        from django.utils import timezone
+        return (obj.is_premium and 
+                obj.premium_expires_at and 
+                obj.premium_expires_at > timezone.now())
+
+    def get_premium_expires_at(self, obj):
+        """Return premium expiry date if active"""
+        from django.utils import timezone
+        if (obj.is_premium and 
+            obj.premium_expires_at and 
+            obj.premium_expires_at > timezone.now()):
+            return obj.premium_expires_at
+        return None
+
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         ret['document_type'] = DocumentTypeSerializer(instance.document_type).data
         return ret
+
+    
 
 
 # Full serializers (for verified users)
