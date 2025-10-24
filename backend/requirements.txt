@@ -9,3 +9,4 @@ gunicorn
 Pillow
 django-filter
 requests
+pillow-heif

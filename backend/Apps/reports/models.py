@@ -3,6 +3,31 @@ from PIL import Image, ImageFilter
 from io import BytesIO
 from django.core.files.base import ContentFile
 import uuid
+import os
+
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+    HEIF_AVAILABLE = True
+except ImportError:
+    HEIF_AVAILABLE = False
+
+def convert_heic_to_jpeg(image_file):
+    """ COnvert HEIC to JPEG if needed """
+    if image_file.name.lower().endswith(('.heic', '.heif')):
+        image_file.seek(0)
+        img = Image.open(image_file).convert("RGB")
+
+        output = BytesIO()
+        img.save(output, format='JPEG', quality=90)
+
+        # Creating new filename with .jpeg
+        name_without_ext = os.path.splitext(image_file.name)[0]
+        new_name = f"{name_without_ext}.jpg"
+
+        return ContentFile(output.getvalue(), name=new_name)
+    return image_file
+
 
 def make_blurred_copy(image_file):
     image_file.seek(0)
@@ -50,6 +75,9 @@ class LostDocument(models.Model):
         return f"{self.Owner_name} - {self.document_type.name}"
     
     def save(self, *args, **kwargs):
+        if self.image:
+            self.image = convert_heic_to_jpeg(self.image)
+        
         is_new = self.pk is None
         super().save(*args, **kwargs)
         if is_new:
@@ -75,6 +103,9 @@ class FoundDocument(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         creating_blur = False
+
+        if self.image_original:
+            self.image_original = convert_heic_to_jpeg(self.image_original)
         
         if self.image_original and (not self.image_blurred or getattr(self.image_original, "file", None) is not None):
             creating_blur = True
