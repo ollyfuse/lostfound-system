@@ -1,4 +1,4 @@
-import requests
+import requests  # type: ignore
 import uuid
 import base64
 from django.conf import settings

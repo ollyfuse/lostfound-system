@@ -1,5 +1,5 @@
 from rest_framework import generics, filters
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend # type: ignore
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -37,7 +37,7 @@ class LostDocumentListView(generics.ListAPIView):
     filterset_fields = ["document_type"]
     search_fields = ["Owner_name", "document_number"]
 
-    def get_queryset(self):
+    def get_queryset(self): # type: ignore
         from django.utils import timezone
         from django.db.models import Case, When, BooleanField
         
@@ -67,7 +67,7 @@ class FoundDocumentListView(generics.ListAPIView):
     filterset_fields = ["document_type"]
     search_fields = ["found_name", "document_number"]
 
-    def get_queryset(self):
+    def get_queryset(self): # type: ignore
         return FoundDocument.objects.filter(
             is_removed=False
         ).order_by("-created_at")
@@ -266,7 +266,7 @@ def upgrade_to_premium(request):
 
         if result['success']:
             #  Store the payment reference in the document
-            lost_doc.premium_payment = payment
+            lost_doc.premium_payment = payment # type: ignore
             lost_doc.save()
 
             return Response({
@@ -300,7 +300,7 @@ def check_premium_payment(request,payment_id):
             payment.save()
 
             # Activate premium for the document
-            lost_doc = payment.premium_lost_documents.first()
+            lost_doc = payment.premium_lost_documents.first() # type: ignore
             if lost_doc:
                 from django.utils import timezone
                 from datetime import timedelta
@@ -352,7 +352,7 @@ def request_document_removal(request, document_type, document_id):
 
         # Send removal email
         from core.tasks import send_removal_email
-        send_removal_email.delay(document_type, document_id, removal_token)
+        send_removal_email.delay(document_type, document_id, removal_token) # type: ignore
 
         return Response({
             'success': True,

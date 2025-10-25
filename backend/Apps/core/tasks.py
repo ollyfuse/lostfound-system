@@ -68,11 +68,11 @@ def check_and_notify_matches(found_doc_id=None, lost_doc_id=None):
     for match in possible_matches:
         if found_doc_id:
             lost_doc = match
-            current_found_doc = found_doc
+            current_found_doc = found_doc # type: ignore
         else:
             found_doc = match
             current_found_doc = found_doc
-            lost_doc = lost_doc
+            lost_doc = lost_doc # type: ignore
 
         # Check if lost document owner has email
         if not lost_doc.contact.email:
@@ -82,7 +82,7 @@ def check_and_notify_matches(found_doc_id=None, lost_doc_id=None):
         from .models import VerificationToken
         vt = VerificationToken.objects.create(
             report_type="found",
-            report_id=current_found_doc.id,
+            report_id=current_found_doc.id, # type: ignore
             contact_email=lost_doc.contact.email,
             contact_phone=""  # Not needed for automatic matches
         )
@@ -91,7 +91,7 @@ def check_and_notify_matches(found_doc_id=None, lost_doc_id=None):
 
         # Render HTML template
         context = {
-            "owner_name": lost_doc.Owner_name,
+            "owner_name": lost_doc.Owner_name, # type: ignore
             "document_type": lost_doc.document_type.name,
             "document_number": lost_doc.document_number,
             "verification_link": verification_link,
@@ -149,7 +149,7 @@ def send_removal_email(document_type, document_id, removal_token):
             subject=subject,
             body="Please confirm removal of your document listing.",
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[document.contact.email]
+            to=[document.contact.email] # type: ignore
         )
         msg.attach_alternative(html_content, "text/html")
         msg.send(fail_silently=False)

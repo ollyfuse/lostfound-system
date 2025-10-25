@@ -48,7 +48,7 @@ class FoundDocumentPublicSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get("request")
         if obj.image_blurred:
-            return request.build_absolute_uri(obj.image_blurred.url)
+            return request.build_absolute_uri(obj.image_blurred.url) # type: ignore
         return None
 
 class LostDocumentPublicSerializer(serializers.ModelSerializer):
@@ -73,7 +73,7 @@ class LostDocumentPublicSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get("request")
         if obj.image:
-            return request.build_absolute_uri(obj.image.url)
+            return request.build_absolute_uri(obj.image.url) # type: ignore
         return None
 
     def get_is_premium(self, obj):
@@ -150,7 +150,7 @@ class FoundDocumentSerializer(serializers.ModelSerializer):
     def get_image_original(self, obj):
         request = self.context.get("request")
         if obj.image_original:
-            return request.build_absolute_uri(obj.image_original.url)
+            return request.build_absolute_uri(obj.image_original.url) # type: ignore
         return None
 
     def create(self, validated_data):
