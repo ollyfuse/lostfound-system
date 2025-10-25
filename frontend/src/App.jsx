@@ -8,6 +8,8 @@ import PublicDocuments from "./pages/PublicDocuments";
 import DocumentDetails from "./pages/DocumentDetail"; // Your payment-gated component
 import axiosClient from "./api/axiosClient";
 import Footer from "./components/Footer";
+import RemoveDocument from "./pages/RemoveDocument";
+
 
 function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery }) {
   const [results, setResults] = useState({ lost: [], found: [] });
@@ -523,6 +525,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/verify" element={<DocumentDetails />} />
+        <Route path="/remove-document" element={<RemoveDocument />} />
       </Routes>
     </Router>
   );

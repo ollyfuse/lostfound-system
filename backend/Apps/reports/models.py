@@ -6,7 +6,7 @@ import uuid
 import os
 
 try:
-    from pillow_heif import register_heif_opener
+    from pillow_heif import register_heif_opener  # type: ignore
     register_heif_opener()
     HEIF_AVAILABLE = True
 except ImportError:
@@ -71,6 +71,12 @@ class LostDocument(models.Model):
     premium_expires_at = models.DateTimeField(blank=True, null=True)
     premium_payment = models.ForeignKey('Payment', null=True, blank=True, on_delete=models.SET_NULL, related_name='premium_lost_documents')
 
+    is_removed = models.BooleanField(default=False)
+    removed_at = models.DateTimeField(blank=True, null=True)
+    removal_reason = models.CharField(max_length=50, blank=True, null=True)
+    removal_token = models.CharField(max_length=100, blank=True, null=True)
+    removal_token_expires = models.DateTimeField(blank=True, null=True)
+
     def __str__(self):
         return f"{self.Owner_name} - {self.document_type.name}"
     
@@ -97,6 +103,12 @@ class FoundDocument(models.Model):
     contact = models.ForeignKey(UserContactInfo, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    is_removed = models.BooleanField(default=False)
+    removed_at = models.DateTimeField(blank=True, null=True)
+    removal_reason = models.CharField(max_length=50, blank=True, null=True)
+    removal_token = models.CharField(max_length=100, blank=True, null=True)
+    removal_token_expires = models.DateTimeField(blank=True, null=True)
+
     def __str__(self):
         return f"Found {self.document_type.name}"
     
@@ -113,8 +125,8 @@ class FoundDocument(models.Model):
         super().save(*args, **kwargs)  # Save original first
         
         if creating_blur:
-            # Create blurred version
-            storage = self.image_original.storage
+            # blurred version
+            storage = self.image_original.storage     # type: ignore 
             f = storage.open(self.image_original.name)
             blurred_file = make_blurred_copy(f)
             self.image_blurred.save(blurred_file.name, blurred_file, save=False)
@@ -123,11 +135,6 @@ class FoundDocument(models.Model):
         if is_new:
             from core.tasks import check_and_notify_matches
             check_and_notify_matches.delay(found_doc_id=self.id) # type: ignore
-
-
-# --------------------------------
-# Payment Models
-# --------------------------------
 
 class Payment(models.Model):
     PAYMENT_STATUS_CHOICES = [

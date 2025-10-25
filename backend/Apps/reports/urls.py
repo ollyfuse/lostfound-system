@@ -10,7 +10,9 @@ from .views import (
     request_payment,
     check_payment_status,
     upgrade_to_premium,
-    check_premium_payment
+    check_premium_payment,
+    request_document_removal,
+    confirm_document_removal,
 )
 
 urlpatterns = [
@@ -30,4 +32,7 @@ urlpatterns = [
      # Premium URLs
     path('premium/upgrade/', upgrade_to_premium, name='upgrade-to-premium'),
     path('premium/status/<uuid:payment_id>/', check_premium_payment, name='check-premium-payment'),
+     # Document removal URLs
+    path('documents/<str:document_type>/<int:document_id>/request-removal/', request_document_removal, name='request_document_removal'),
+    path('documents/confirm-removal/', confirm_document_removal, name='confirm_document_removal'),
 ]

@@ -3,6 +3,7 @@ import { Calendar, MapPin, Hash, Eye, Crown, Star, X, Lock, CheckCircle, FileTex
 import ClaimForm from "./ClaimForm";
 import PremiumUpgradeModal from "./PremiumUpgradeModal";
 import axiosClient from "../api/axiosClient";
+import RemovalModal from "./RemovalModal";
 
 
 export default function DocumentCard({ document, type, onTabChange }) {
@@ -13,6 +14,8 @@ export default function DocumentCard({ document, type, onTabChange }) {
   const [verificationInput, setVerificationInput] = useState("");
   const [showUnblurred, setShowUnblurred] = useState(false);
   const [unmaskedDocument, setUnmaskedDocument] = useState(null);
+  const [showRemovalModal, setShowRemovalModal] = useState(false);
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -192,6 +195,12 @@ export default function DocumentCard({ document, type, onTabChange }) {
                 {type === 'found' ? 'Claim' : 'Found It'}
               </button>
             </div>
+            {/* <button
+              onClick={() => setShowRemovalModal(true)}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium"
+            >
+              ✅ Mark as Found
+            </button> */}
 
             {type === 'lost' && !document.is_premium && (
               <button
@@ -397,33 +406,45 @@ export default function DocumentCard({ document, type, onTabChange }) {
           </div>
 
           {/* Action Button */}
-          <button
-            onClick={() => {
-              setShowDetailsModal(false);
-              if (type === 'lost') {
-                onTabChange('upload-found');
-              } else {
-                setShowClaimModal(true);
-              }
-            }}
-            className={`w-full py-4 px-6 rounded-xl transition-colors font-semibold text-lg flex items-center justify-center gap-3 ${
-              type === 'found'
-                ? 'bg-green-600 hover:bg-green-700 text-white'
-                : 'bg-red-600 hover:bg-red-700 text-white'
-            }`}
-          >
-            {type === 'found' ? (
-              <>
-                <Phone className="w-5 h-5" />
-                Claim This Document
-              </>
-            ) : (
-              <>
-                <Heart className="w-5 h-5" />
-                I Found This
-              </>
-            )}
-          </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  if (type === 'lost') {
+                    onTabChange('upload-found');
+                  } else {
+                    setShowClaimModal(true);
+                  }
+                }}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors ${
+                  type === 'found'
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-red-600 hover:bg-red-700 text-white'
+                }`}
+              >
+                {type === 'found' ? (
+                  <>
+                    <Phone className="w-4 h-4" />
+                    Claim
+                  </>
+                ) : (
+                  <>
+                    <Heart className="w-4 h-4" />
+                    Found It
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => setShowRemovalModal(true)}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 border border-gray-300"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Remove
+              </button>
+            </div>
+
+
         </div>
       </div>
     </div>
@@ -465,6 +486,17 @@ export default function DocumentCard({ document, type, onTabChange }) {
             </div>
           </div>
         </div>
+      )}
+      {showRemovalModal && (
+        <RemovalModal
+          document={document}
+          type={type}
+          onClose={() => setShowRemovalModal(false)}
+          onSuccess={() => {
+            setShowRemovalModal(false);
+            // Optionally refresh the page or remove from list
+          }}
+        />
       )}
     </>
   );

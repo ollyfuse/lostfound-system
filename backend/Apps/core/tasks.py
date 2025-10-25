@@ -114,3 +114,47 @@ def check_and_notify_matches(found_doc_id=None, lost_doc_id=None):
             print(f"Failed to send email: {e}")
 
     return f"{total_notified} notification(s) sent."
+
+
+@shared_task
+def send_removal_email(document_type, document_id, removal_token):
+    """Send document removal confirmation email"""
+    try:
+        from reports.models import LostDocument, FoundDocument
+
+        # Get document
+        if document_type == "lost":
+            document = LostDocument.objects.get(id=document_id)
+            owner_name = document.Owner_name
+        else:
+            document = FoundDocument.objects.get(id=document_id)
+            owner_name = document.found_name or "Document Owner"
+
+        # Removal URL
+        removal_url = f"{settings.FRONTEND_URL}/remove-document?token={removal_token}"
+
+        # render email template
+        context = {
+            "owner_name": owner_name,
+            "document_type": document.document_type.name,
+            "document_number": document.document_number or "Not specified",
+            "removal_url": removal_url,
+            "reason": document.removal_reason or "FOUND"
+        }
+        html_content = render_to_string("emails/document_removal.html", context)
+
+        subject = f"Confirm Removal of your {context['document_type']} listing"
+
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body="Please confirm removal of your document listing.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[document.contact.email]
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+
+        return f"Removal email sent to {document.contact.email}"
+    
+    except Exception as e:
+        return f"Failed to send removal email: {e}"

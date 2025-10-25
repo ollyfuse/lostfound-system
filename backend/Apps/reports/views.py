@@ -48,7 +48,7 @@ class LostDocumentListView(generics.ListAPIView):
         ).update(is_premium=False, premium_expires_at=None)
         
         # Return queryset with premium documents first
-        return LostDocument.objects.annotate(
+        return LostDocument.objects.filter(is_removed=False).annotate(
             is_active_premium=Case(
                 When(
                     is_premium=True,
@@ -66,6 +66,11 @@ class FoundDocumentListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["document_type"]
     search_fields = ["found_name", "document_number"]
+
+    def get_queryset(self):
+        return FoundDocument.objects.filter(
+            is_removed=False
+        ).order_by("-created_at")
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DocumentVerificationView(View):
@@ -312,4 +317,102 @@ def check_premium_payment(request,payment_id):
         return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def request_document_removal(request, document_type, document_id):
+    """ Request document removal with verification """
+    try:
+        verification_input = request.data.get('verification_input', '').strip().lower()
+        reason = request.data.get('reason', 'FOUND')
+
+        # Get document
+        if document_type == 'lost':
+            document = LostDocument.objects.get(id=document_id, is_removed=False)
+            owner_name = document.Owner_name.lower()
+        else:  
+            document = FoundDocument.objects.get(id=document_id, is_removed=False)
+            owner_name = (document.found_name or '').lower()
+
+        doc_number = (document.document_number or '').lower()
+
+        # Ownership verification
+        if verification_input not in [owner_name, doc_number]:
+            return Response({'error': 'Verification failed'}, status=403)
         
+        # Generate removal token
+        from django.utils import timezone
+        from datetime import timedelta
+
+        removal_token = str(uuid.uuid4())
+        document.removal_token = removal_token
+        document.removal_reason = reason
+        document.removal_token_expires = timezone.now() + timedelta(hours=24)
+        document.save()
+
+        # Send removal email
+        from core.tasks import send_removal_email
+        send_removal_email.delay(document_type, document_id, removal_token)
+
+        return Response({
+            'success': True,
+            'message': 'Removal email sent. Check your inbox to confirm.'
+        })
+    except (LostDocument.DoesNotExist, FoundDocument.DoesNotExist):
+        return Response({'error': 'Document not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+        
+@api_view(['GET'])
+def confirm_document_removal(request):
+    """Confirm document removal via email link"""
+    try:
+        token = request.GET.get('token')
+        if not token:
+            return Response({'error': 'Missing removal token'}, status=400)
+        from django.utils import timezone
+
+        # find document with this token
+        document = None
+        document_type = None
+
+        # Check lost documents
+        try:
+            document = LostDocument.objects.get(
+                removal_token=token,
+                removal_token_expires__gt=timezone.now(),
+                is_removed=False
+            )
+            document_type = 'lost'
+        except LostDocument.DoesNotExist:
+            pass
+
+        # Check found documents
+        if not document:
+            try:
+                document = FoundDocument.objects.get(
+                    removal_token=token,
+                    removal_token_expires__gt=timezone.now(),
+                    is_removed=False
+                )
+                document_type = 'found'
+            except FoundDocument.DoesNotExist:
+                return Response({'error': 'Invalid or expired token'}, status=400)
+            
+        # Mark document as removed
+        document.is_removed = True
+        document.removed_at = timezone.now()
+        document.removal_token = None
+        document.removal_token_expires = None
+        document.save() 
+
+        return Response({
+            'success': True,
+            'message': f'Document successful removed from listings',
+            'document_type': document_type,
+            'document_id': document.document_type.name
+        }) 
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
