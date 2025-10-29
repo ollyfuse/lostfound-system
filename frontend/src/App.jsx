@@ -5,10 +5,14 @@ import LostDocumentForm from "./components/LostDocumentForm";
 import FoundDocumentForm from "./components/FoundDocumentForm";
 import DocumentCard from "./components/DocumentCard";
 import PublicDocuments from "./pages/PublicDocuments";
-import DocumentDetails from "./pages/DocumentDetail"; // Your payment-gated component
+import DocumentDetails from "./pages/DocumentDetail"; 
 import axiosClient from "./api/axiosClient";
 import Footer from "./components/Footer";
 import RemoveDocument from "./pages/RemoveDocument";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfService from "./components/TermsOfService";
+import HelpCenter from "./components/HelpCenter";
+
 
 
 function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery }) {
@@ -526,6 +530,9 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/verify" element={<DocumentDetails />} />
         <Route path="/remove-document" element={<RemoveDocument />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/help" element={<HelpCenter />} />
       </Routes>
     </Router>
   );
