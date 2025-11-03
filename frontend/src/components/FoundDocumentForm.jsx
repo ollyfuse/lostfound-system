@@ -15,6 +15,7 @@ export default function FoundDocumentForm() {
     contact_email: "",
     contact_phone: "",
     image: null,
+    agreeToTerms: false,
   });
   const [previewUrl, setPreviewUrl] = useState(null);
   const [status, setStatus] = useState({ type: null, message: "" });
@@ -74,6 +75,7 @@ export default function FoundDocumentForm() {
     if (!form.contact_full_name.trim()) return "Please provide your name so we can contact you.";
     if (!form.contact_email.trim()) return "Please provide your email.";
     if (!form.image) return "Please upload a photo of the document.";
+    if (!form.agreeToTerms) return "Please agree to the Terms of Service to continue.";
     return null;
   }
 
@@ -123,6 +125,7 @@ export default function FoundDocumentForm() {
         contact_email: "",
         contact_phone: "",
         image: null,
+        agreeToTerms: false,
       });
       setPreviewUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -385,6 +388,31 @@ export default function FoundDocumentForm() {
                   placeholder="+250 7xx xxx xxx"
                 />
               </div>
+            </div>
+          </div>
+           {/* Terms Agreement */}
+          <div className="pt-4">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="agreeToTerms"
+                name="agreeToTerms"
+                checked={form.agreeToTerms}
+                onChange={handleInput}
+                className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                required
+              />
+              <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
+                I agree to the{" "}
+                <a 
+                  href="/terms" 
+                  target="_blank" 
+                  className="text-green-600 hover:text-green-700 underline font-medium"
+                >
+                  Terms of Service
+                </a>{" "}
+                and understand that my information will be used to help return this document to its owner.
+              </label>
             </div>
           </div>
 

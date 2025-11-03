@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import start_claim, verify_claim, protected_image
+from .views import start_claim, verify_claim, protected_image, contact_us
 
 urlpatterns = [
     path("claims/start/", start_claim, name="start_claim"),
     path("claims/verify/", verify_claim, name="verify_claim"),
     path("protected-image/", protected_image, name="protected_image"),
+    path("contact/", contact_us, name="contact_us"),
 ]

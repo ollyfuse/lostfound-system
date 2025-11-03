@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { 
   HelpCircle, Search, FileText, Upload, Eye, Phone, Shield, 
   ChevronDown, ChevronRight, Mail, MapPin, Clock, CheckCircle,
@@ -363,6 +364,16 @@ export default function HelpCenter() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4">
+            <div className="mb-8">
+                <button
+                onClick={() => window.history.back()}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+                </button>
+            </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">

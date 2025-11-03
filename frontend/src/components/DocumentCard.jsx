@@ -57,15 +57,6 @@ export default function DocumentCard({ document, type, onTabChange }) {
       <div className={`bg-white rounded-xl shadow-md border hover:shadow-lg transition-all duration-200 ${
         document.is_premium ? 'border-yellow-300 ring-2 ring-yellow-100' : 'border-gray-200'
       }`}>
-        
-        {document.is_premium && (
-          <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-3 py-1 text-xs font-medium flex items-center justify-center gap-1">
-            <Crown className="w-3 h-3" />
-            <span>PREMIUM LISTING</span>
-            <Star className="w-3 h-3" />
-          </div>
-        )}
-
         {document.image ? (
           <div className="h-48 bg-gray-100 overflow-hidden relative rounded-t-xl">
             <img 
@@ -166,18 +157,17 @@ export default function DocumentCard({ document, type, onTabChange }) {
               </div>
             </div>
           </div>
-
-          {/* Clean Button Layout */}
+          {/* Professional Compact Button Layout */}
           <div className="space-y-2">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowDetailsModal(true)}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-3 rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 text-sm"
-              >
-                <Eye className="w-4 h-4" />
-                <span>Details</span>
-              </button>
+            <button
+              onClick={() => setShowDetailsModal(true)}
+              className="w-full bg-gray-300 hover:bg-gray-500 text-black py-2 px-3 rounded-md transition-colors font-medium text-sm flex items-center justify-center gap-1.5"
+            >
+              <Eye className="w-3 h-3" />
+              View Details
+            </button>
 
+            <div className="flex gap-1.5">
               <button
                 onClick={() => {
                   if (type === 'lost') {
@@ -186,32 +176,25 @@ export default function DocumentCard({ document, type, onTabChange }) {
                     setShowClaimModal(true);
                   }
                 }}
-                className={`flex-1 py-2.5 px-3 rounded-lg transition-colors text-sm font-medium border ${
+                className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
                   type === 'found'
-                    ? 'border-green-600 text-green-700 hover:bg-green-50'
-                    : 'border-red-600 text-red-700 hover:bg-red-50'
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
               >
-                {type === 'found' ? 'Claim' : 'Found It'}
+                {type === 'found' ? 'Claim' : 'Report Found'}
               </button>
+              {type === 'lost' && !document.is_premium && (
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-1.5 px-2 rounded-md text-xs font-medium transition-colors"
+                >
+                  Go Premium Listing
+                </button>
+              )}
             </div>
-            {/* <button
-              onClick={() => setShowRemovalModal(true)}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium"
-            >
-              ✅ Mark as Found
-            </button> */}
-
-            {type === 'lost' && !document.is_premium && (
-              <button
-                onClick={() => setShowUpgradeModal(true)}
-                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white py-2 px-3 rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 text-sm"
-              >
-                <Crown className="w-4 h-4" />
-                <span>Go Premium - 500 RWF</span>
-              </button>
-            )}
           </div>
+
         </div>
       </div>
 
@@ -430,7 +413,7 @@ export default function DocumentCard({ document, type, onTabChange }) {
                 ) : (
                   <>
                     <Heart className="w-4 h-4" />
-                    Found It
+                    Report Found
                   </>
                 )}
               </button>
@@ -440,18 +423,14 @@ export default function DocumentCard({ document, type, onTabChange }) {
                 className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 border border-gray-300"
               >
                 <CheckCircle className="w-4 h-4" />
-                Remove
+                Request Removal
               </button>
             </div>
-
-
         </div>
       </div>
     </div>
   </div>
 )}
-
-
       {showClaimModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -494,7 +473,6 @@ export default function DocumentCard({ document, type, onTabChange }) {
           onClose={() => setShowRemovalModal(false)}
           onSuccess={() => {
             setShowRemovalModal(false);
-            // Optionally refresh the page or remove from list
           }}
         />
       )}

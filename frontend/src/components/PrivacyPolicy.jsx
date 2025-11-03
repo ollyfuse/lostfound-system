@@ -1,8 +1,19 @@
 import { Shield, Mail, MapPin, Calendar, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
+        <div className="mb-8">
+                            <button
+                            onClick={() => window.history.back()}
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                            >
+                            <ArrowLeft className="w-4 h-4" />
+                            Back
+                            </button>
+                        </div>
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {/* Header */}

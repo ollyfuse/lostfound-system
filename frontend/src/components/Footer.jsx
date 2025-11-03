@@ -40,7 +40,7 @@ export default function Footer() {
               <li><a href="#" className="text-gray-300 hover:text-white transition">Browse Documents</a></li>
               <li><a href="#" className="text-gray-300 hover:text-white transition">Report Lost</a></li>
               <li><a href="#" className="text-gray-300 hover:text-white transition">Upload Found</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">How It Works</a></li>
+              <li><a href="/how-it-works" className="text-gray-300 hover:text-white transition">How It Works</a></li>
             </ul>
           </div>
 
@@ -51,7 +51,7 @@ export default function Footer() {
               <li><a href="/help" className="text-gray-300 hover:text-white transition">Help Center</a></li>
               <li><a href="/privacy" className="text-gray-300 hover:text-white transition">Privacy Policy</a></li>
               <li><a href="/terms" className="text-gray-300 hover:text-white transition">Terms of Service</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Contact Us</a></li>
+              <li><a href="/contact" className="text-gray-300 hover:text-white transition">Contact Us</a></li>
             </ul>
           </div>
         </div>

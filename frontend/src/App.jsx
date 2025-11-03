@@ -12,8 +12,8 @@ import RemoveDocument from "./pages/RemoveDocument";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import HelpCenter from "./components/HelpCenter";
-
-
+import HowItWorks from "./components/HowItWorks";
+import ContactUs from "./components/ContactUs";
 
 function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery }) {
   const [results, setResults] = useState({ lost: [], found: [] });
@@ -339,14 +339,7 @@ function HomePage() {
 
         {/* === Statistics Section === */}
         <section className="bg-gradient-to-r from-blue-600 to-green-600 py-8">
-          <div className="max-w-6xl mx-auto px-4">
-            {/* <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold text-white mb-3">Community Impact</h3>
-              <p className="text-blue-100 text-lg max-w-2xl mx-auto">
-                Real results from our growing community of helpers reuniting people with their documents
-              </p>
-            </div> */}
-            
+          <div className="max-w-6xl mx-auto px-4">         
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 text-center">
               <div className="group">
                 <div className="flex justify-center mb-4">
@@ -387,21 +380,6 @@ function HomePage() {
                 <p className="text-blue-100">Documents successfully matched</p>
               </div>
             </div>
-
-            {/* <div className="mt-12 text-center">
-              <div className="inline-flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4">
-                <div className="flex items-center gap-2 text-white">
-                  <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">Live Platform</span>
-                </div>
-                <div className="w-px h-4 bg-white/30"></div>
-                <span className="text-white/90 text-sm">🔒 Privacy Protected</span>
-                <div className="w-px h-4 bg-white/30"></div>
-                <span className="text-white/90 text-sm">⚡ Instant Matching</span>
-                <div className="w-px h-4 bg-white/30"></div>
-                <span className="text-white/90 text-sm">🆓 Completely Free</span>
-              </div>
-            </div> */}
           </div>
         </section>
 
@@ -533,6 +511,8 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/help" element={<HelpCenter />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/contact" element={<ContactUs />} />
       </Routes>
     </Router>
   );

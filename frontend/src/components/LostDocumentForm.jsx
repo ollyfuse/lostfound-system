@@ -15,6 +15,7 @@ export default function LostDocumentForm() {
     when_lost: "",
     description: "",
     image: null,
+    agreeToTerms: false,
   });
   const [status, setStatus] = useState({ type: null, message: "" });
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -73,6 +74,7 @@ export default function LostDocumentForm() {
     if (!form.email.trim()) return "Please provide a contact email.";
     if (!form.document_type) return "Please select a document type.";
     if (!form.where_lost.trim()) return "Please provide the location where it was lost.";
+    if (!form.agreeToTerms) return "Please agree to the Terms of Service to continue.";
     return null;
   }
 
@@ -123,6 +125,7 @@ export default function LostDocumentForm() {
         when_lost: "",
         description: "",
         image: null,
+        agreeToTerms: false,
       });
       setPreviewUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -384,6 +387,30 @@ export default function LostDocumentForm() {
               />
             </div>
           </div>
+          <div className="pt-4">
+  <div className="flex items-start gap-3">
+    <input
+      type="checkbox"
+      id="agreeToTerms"
+      name="agreeToTerms"
+      checked={form.agreeToTerms}
+      onChange={handleInput}
+      className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+      required
+    />
+    <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
+      I agree to the{" "}
+      <a 
+        href="/terms" 
+        target="_blank" 
+        className="text-red-600 hover:text-red-700 underline font-medium"
+      >
+        Terms of Service
+      </a>{" "}
+      and understand that my information will be used to help recover my lost document.
+    </label>
+  </div>
+</div>
 
           {/* Status Message */}
           {status.type && (
