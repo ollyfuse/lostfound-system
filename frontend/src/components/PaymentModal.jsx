@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Phone, CreditCard, CheckCircle, XCircle, Loader } from 'lucide-react';
+import { X, Phone, CheckCircle, XCircle, Loader } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 
 export default function PaymentModal({ isOpen, onClose, documentData, onPaymentSuccess }) {

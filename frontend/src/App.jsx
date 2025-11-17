@@ -15,7 +15,7 @@ import HelpCenter from "./components/HelpCenter";
 import HowItWorks from "./components/HowItWorks";
 import ContactUs from "./components/ContactUs";
 
-function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery }) {
+function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery, handleTabChange }) {
   const [results, setResults] = useState({ lost: [], found: [] });
   const [loading, setLoading] = useState(false);
 
@@ -121,10 +121,24 @@ function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery }) {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {results.found.slice(0, 4).map((doc) => (
-                      <div key={doc.id} className="transform scale-90">
-                        <DocumentCard document={doc} type="found" />
-                      </div>
-                    ))}
+                     <div key={doc.id} className="transform scale-90 cursor-pointer" onClick={() => {
+                          onClose(); 
+                          handleTabChange("browse"); 
+                          setTimeout(() => {
+                            const element = document.getElementById(`document-${doc.id}`);
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              element.classList.add('ring-4', 'ring-blue-400', 'ring-opacity-75');
+                              element.style.transition = 'all 0.3s ease';
+                              setTimeout(() => {
+                                element.classList.remove('ring-4', 'ring-blue-400', 'ring-opacity-75');
+                              }, 3000);
+                            }
+                          }, 500);
+                        }}>
+                          <DocumentCard document={doc} type="found" />
+                        </div>
+                                            ))}
                   </div>
                   {results.found.length > 4 && (
                     <p className="text-sm text-gray-500 mt-2">
@@ -141,10 +155,28 @@ function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery }) {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {results.lost.slice(0, 4).map((doc) => (
-                      <div key={doc.id} className="transform scale-90">
-                        <DocumentCard document={doc} type="lost" />
-                      </div>
-                    ))}
+                     <div key={doc.id} className="transform scale-90 cursor-pointer" onClick={() => {
+                          onClose(); // Close search overlay
+                          handleTabChange("browse");
+                          setTimeout(() => {
+                            // Switch to lost tab first
+                            window.location.hash = 'lost-tab';
+                            setTimeout(() => {
+                              const element = document.getElementById(`document-${doc.id}`);
+                              if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                element.classList.add('ring-4', 'ring-red-400', 'ring-opacity-75');
+                                element.style.transition = 'all 0.3s ease';
+                                setTimeout(() => {
+                                  element.classList.remove('ring-4', 'ring-red-400', 'ring-opacity-75');
+                                }, 3000);
+                              }
+                            }, 200);
+                          }, 500);
+                        }}>
+                          <DocumentCard document={doc} type="lost" />
+                        </div>
+                                            ))}
                   </div>
                   {results.lost.length > 4 && (
                     <p className="text-sm text-gray-500 mt-2">
@@ -494,6 +526,7 @@ function HomePage() {
         onClose={handleCloseSearch}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        handleTabChange={handleTabChange}
       />
 
        <Footer />

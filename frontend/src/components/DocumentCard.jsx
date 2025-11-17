@@ -6,7 +6,7 @@ import axiosClient from "../api/axiosClient";
 import RemovalModal from "./RemovalModal";
 
 
-export default function DocumentCard({ document, type, onTabChange }) {
+export default function DocumentCard({ document, type, onTabChange, id }) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -54,7 +54,7 @@ export default function DocumentCard({ document, type, onTabChange }) {
 
   return (
     <>
-      <div className={`bg-white rounded-xl shadow-md border hover:shadow-lg transition-all duration-200 ${
+      <div  id={id} className={`bg-white rounded-xl shadow-md border hover:shadow-lg transition-all duration-200 ${
         document.is_premium ? 'border-yellow-300 ring-2 ring-yellow-100' : 'border-gray-200'
       }`}>
         {document.image ? (
@@ -161,7 +161,7 @@ export default function DocumentCard({ document, type, onTabChange }) {
           <div className="space-y-2">
             <button
               onClick={() => setShowDetailsModal(true)}
-              className="w-full bg-gray-300 hover:bg-gray-500 text-black py-2 px-3 rounded-md transition-colors font-medium text-sm flex items-center justify-center gap-1.5"
+              className="w-full bg-gray-300 hover:bg-gray-500 hover:text-white text-black py-2 px-3 rounded-md transition-colors font-medium text-sm flex items-center justify-center gap-1.5"
             >
               <Eye className="w-3 h-3" />
               View Details
@@ -182,7 +182,7 @@ export default function DocumentCard({ document, type, onTabChange }) {
                     : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
               >
-                {type === 'found' ? 'Claim' : 'Report Found'}
+                {type === 'found' ? 'Claim' : 'I Found This'}
               </button>
               {type === 'lost' && !document.is_premium && (
                 <button
@@ -413,7 +413,7 @@ export default function DocumentCard({ document, type, onTabChange }) {
                 ) : (
                   <>
                     <Heart className="w-4 h-4" />
-                    Report Found
+                    I Found This
                   </>
                 )}
               </button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Search, Filter, Calendar, ChevronLeft, ChevronRight, FileText, AlertCircle } from "lucide-react";
 import axiosClient from "../api/axiosClient";
 import DocumentCard from "../components/DocumentCard";
@@ -9,6 +9,7 @@ export default function PublicDocuments({onTabChange}) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("found");
   const [currentPage, setCurrentPage] = useState(1);
+  const [rotationIndex, setRotationIndex] = useState(0);
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -30,19 +31,57 @@ export default function PublicDocuments({onTabChange}) {
     fetchDocuments();
   }, []);
 
+  // Premium rotation timer
+  useEffect(() => {
+    if (activeTab !== "lost") return;
+
+    const premiumDocs = lostDocs.filter(doc => doc.is_premium);
+    if (premiumDocs.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setRotationIndex(prev => prev + 1);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [lostDocs, activeTab]);
+
+  // Sort documents with random premium rotation
+  const sortedDocs = useMemo(() => {
+    if (activeTab === "found") {
+      return foundDocs;
+    }
+
+    const premiumDocs = lostDocs.filter(doc => doc.is_premium);
+    const regularDocs = lostDocs.filter(doc => !doc.is_premium);
+
+    if (premiumDocs.length === 0) {
+      return regularDocs;
+    }
+
+    // Randomly shuffle all premium documents
+    const shuffledPremium = [...premiumDocs].sort(() => Math.random() - 0.5);
+    
+    return [...shuffledPremium, ...regularDocs];
+  }, [activeTab, lostDocs, foundDocs, rotationIndex]);
+
   // Reset to page 1 when switching tabs
   useEffect(() => {
     setCurrentPage(1);
+    setRotationIndex(0);
   }, [activeTab]);
 
-  // Get current documents based on active tab
-  const currentDocs = activeTab === "found" ? foundDocs : lostDocs;
-  
+  useEffect(() => {
+    if (window.location.hash === '#lost-tab') {
+      setActiveTab('lost');
+      window.location.hash = '';
+    }
+  }, []);
+
   // Calculate pagination
-  const totalPages = Math.ceil(currentDocs.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedDocs.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentItems = currentDocs.slice(startIndex, endIndex);
+  const currentItems = sortedDocs.slice(startIndex, endIndex);
 
   const goToPage = (page) => {
     setCurrentPage(page);
@@ -81,16 +120,6 @@ export default function PublicDocuments({onTabChange}) {
         <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-4">
           Browse the latest documents reported as lost or successfully recovered. Stay informed and see if your document has been listed or matched with its rightful owner. For your security, all personal details are blurred and remain protected until verification is complete
         </p>
-        {/* <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span>Found: {foundDocs.length} documents</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <span>Lost: {lostDocs.length} reports</span>
-          </div>
-        </div> */}
       </div>
 
       {/* Refined Tabs Section */}
@@ -149,6 +178,18 @@ export default function PublicDocuments({onTabChange}) {
             }
           </p>
         </div>
+
+        {/* Premium Rotation Indicator */}
+        {activeTab === "lost" && lostDocs.filter(doc => doc.is_premium).length > 1 && (
+          <div className="text-center mt-4">
+            <div className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-full px-4 py-2">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-yellow-700 font-medium">
+                Premium listings rotate every 30 secs
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Documents Grid */}
@@ -160,6 +201,7 @@ export default function PublicDocuments({onTabChange}) {
               document={doc} 
               type={activeTab} 
               onTabChange={onTabChange}
+              id={`document-${doc.id}`}
             />
           ))}
         </div>
@@ -213,13 +255,13 @@ export default function PublicDocuments({onTabChange}) {
           </div>
 
           <div className="text-sm text-gray-500">
-            Showing {startIndex + 1}-{Math.min(endIndex, currentDocs.length)} of {currentDocs.length} documents
+            Showing {startIndex + 1}-{Math.min(endIndex, sortedDocs.length)} of {sortedDocs.length} documents
           </div>
         </div>
       )}
 
       {/* Enhanced Empty State */}
-      {currentDocs.length === 0 && (
+      {sortedDocs.length === 0 && (
         <div className="text-center py-16">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             {activeTab === "found" ? (
