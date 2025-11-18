@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, Filter, Calendar, ChevronLeft, ChevronRight, FileText, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, AlertCircle } from "lucide-react";
 import axiosClient from "../api/axiosClient";
 import DocumentCard from "../components/DocumentCard";
 
@@ -59,17 +59,36 @@ export default function PublicDocuments({onTabChange}) {
     }
 
     // Randomly shuffle all premium documents
-    const shuffledPremium = [...premiumDocs].sort(() => Math.random() - 0.5);
+    const startIndex = rotationIndex % premiumDocs.length;
+    const rotatedPremium = [...premiumDocs.slice(startIndex), ...premiumDocs.slice(0, startIndex)];
     
-    return [...shuffledPremium, ...regularDocs];
+    return [...rotatedPremium, ...regularDocs];
   }, [activeTab, lostDocs, foundDocs, rotationIndex]);
 
-  // Reset to page 1 when switching tabs
+    const premiumCount = useMemo(() => 
+      lostDocs.filter(doc => doc.is_premium).length, 
+      [lostDocs]
+      );
+
+      const paginationData = useMemo(() => ({
+        totalPages: Math.ceil(sortedDocs.length / itemsPerPage),
+        startIndex: (currentPage - 1) * itemsPerPage,
+        endIndex: (currentPage - 1) * itemsPerPage + itemsPerPage
+      }), [sortedDocs.length, currentPage]);
+
+      const currentItems = useMemo(() => 
+        sortedDocs.slice(paginationData.startIndex, paginationData.endIndex),
+        [sortedDocs, paginationData.startIndex, paginationData.endIndex]
+      );
+
+  // Handle tab changes and hash navigation
   useEffect(() => {
+    // Reset pagination when tab changes
     setCurrentPage(1);
     setRotationIndex(0);
   }, [activeTab]);
 
+  // Handle initial hash navigation (runs once on mount)
   useEffect(() => {
     if (window.location.hash === '#lost-tab') {
       setActiveTab('lost');
@@ -78,10 +97,7 @@ export default function PublicDocuments({onTabChange}) {
   }, []);
 
   // Calculate pagination
-  const totalPages = Math.ceil(sortedDocs.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = sortedDocs.slice(startIndex, endIndex);
+  const { totalPages, startIndex, endIndex } = paginationData;
 
   const goToPage = (page) => {
     setCurrentPage(page);
@@ -180,7 +196,7 @@ export default function PublicDocuments({onTabChange}) {
         </div>
 
         {/* Premium Rotation Indicator */}
-        {activeTab === "lost" && lostDocs.filter(doc => doc.is_premium).length > 1 && (
+        {activeTab === "lost" && premiumCount > 1 && (
           <div className="text-center mt-4">
             <div className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-full px-4 py-2">
               <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>

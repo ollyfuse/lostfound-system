@@ -1,15 +1,43 @@
-import axios from "axios";
+import axios from 'axios';
+
+// Simple cache for GET requests
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/",
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/',
+  timeout: 10000,
 });
 
-axiosClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("API Error:", error.response?.data || error.message);
-    return Promise.reject(error);
+// Request interceptor for caching
+axiosClient.interceptors.request.use((config) => {
+  if (config.method === 'get') {
+    const cacheKey = `${config.url}?${JSON.stringify(config.params)}`;
+    const cached = cache.get(cacheKey);
+    
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      config.adapter = () => Promise.resolve({
+        data: cached.data,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config
+      });
+    }
   }
-);
+  return config;
+});
+
+// Response interceptor for caching
+axiosClient.interceptors.response.use((response) => {
+  if (response.config.method === 'get') {
+    const cacheKey = `${response.config.url}?${JSON.stringify(response.config.params)}`;
+    cache.set(cacheKey, {
+      data: response.data,
+      timestamp: Date.now()
+    });
+  }
+  return response;
+});
 
 export default axiosClient;

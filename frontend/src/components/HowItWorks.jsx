@@ -1,5 +1,5 @@
 import { 
-  FileText, Upload, Search, Phone, CheckCircle, Shield, 
+  FileText, Upload, Search, CheckCircle, Shield, 
   ArrowRight, Clock, Mail, Eye, Heart, User, Crown
 } from "lucide-react";
 import { ArrowLeft } from "lucide-react";

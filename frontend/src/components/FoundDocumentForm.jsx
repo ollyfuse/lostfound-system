@@ -1,6 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Heart, Upload, Calendar, MapPin, User, Mail, Phone, FileText, Hash, Camera } from "lucide-react";
 import axiosClient from "../api/axiosClient";
+
+const useDebounce = (callback, delay) => {
+  const [debounceTimer, setDebounceTimer] = useState(null);
+  
+  return useCallback((...args) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    const newTimer = setTimeout(() => callback(...args), delay);
+    setDebounceTimer(newTimer);
+  }, [callback, delay, debounceTimer]);
+};
 
 export default function FoundDocumentForm() {
   const [types, setTypes] = useState([]);
@@ -37,10 +47,13 @@ export default function FoundDocumentForm() {
     }
   }
 
-  function handleInput(e) {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-  }
+  const handleInput = useCallback((e) => {
+  const { name, value, type, checked } = e.target;
+  setForm((p) => ({ 
+    ...p, 
+    [name]: type === 'checkbox' ? checked : value 
+  }));
+}, []);
 
   function handleFileChange(e) {
     const file = e.target.files?.[0] ?? null;
@@ -69,7 +82,7 @@ export default function FoundDocumentForm() {
     uploadDropRef.current?.classList.remove("border-green-400", "bg-green-50");
   }
 
-  function validate() {
+  const validation = useMemo(() => {
     if (!form.document_type) return "Please select document type.";
     if (!form.where_found.trim()) return "Please provide where you found it.";
     if (!form.contact_full_name.trim()) return "Please provide your name so we can contact you.";
@@ -77,14 +90,15 @@ export default function FoundDocumentForm() {
     if (!form.image) return "Please upload a photo of the document.";
     if (!form.agreeToTerms) return "Please agree to the Terms of Service to continue.";
     return null;
-  }
+  }, [form.document_type, form.where_found, form.contact_full_name, form.contact_email, form.image, form.agreeToTerms]);
+
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: "info", message: "Uploading found document..." });
 
-    const err = validate();
+    const err = validation;
     if (err) {
       setStatus({ type: "error", message: err });
       setLoading(false);

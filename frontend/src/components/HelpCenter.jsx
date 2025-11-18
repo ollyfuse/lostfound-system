@@ -2,8 +2,8 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { 
   HelpCircle, Search, FileText, Upload, Eye, Phone, Shield, 
-  ChevronDown, ChevronRight, Mail, MapPin, Clock, CheckCircle,
-  AlertCircle, Heart, User, Hash, Camera, Crown
+  ChevronDown, ChevronRight, Mail, MapPin, CheckCircle,
+  AlertCircle, Heart, User, Camera, Crown
 } from "lucide-react";
 
 export default function HelpCenter() {

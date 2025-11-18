@@ -1,6 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { FileText, Upload, Calendar, MapPin, User, Mail, Phone, Hash } from "lucide-react";
 import axiosClient from "../api/axiosClient";
+
+const useDebounce = (callback, delay) => {
+  const [debounceTimer, setDebounceTimer] = useState(null);
+  
+  return useCallback((...args) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    const newTimer = setTimeout(() => callback(...args), delay);
+    setDebounceTimer(newTimer);
+  }, [callback, delay, debounceTimer]);
+};
 
 export default function LostDocumentForm() {
   const [types, setTypes] = useState([]);
@@ -37,10 +47,13 @@ export default function LostDocumentForm() {
     }
   }
 
-  function handleInput(e) {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-  }
+  const handleInput = useCallback((e) => {
+  const { name, value, type, checked } = e.target;
+  setForm((p) => ({ 
+    ...p, 
+    [name]: type === 'checkbox' ? checked : value 
+  }));
+}, []);
 
   function handleFileChange(e) {
     const file = e.target.files?.[0] ?? null;
@@ -69,21 +82,21 @@ export default function LostDocumentForm() {
     uploadDropRef.current?.classList.remove("border-blue-400", "bg-blue-50");
   }
 
-  function validate() {
-    if (!form.owner_name.trim()) return "Please provide the owner's full name.";
-    if (!form.email.trim()) return "Please provide a contact email.";
-    if (!form.document_type) return "Please select a document type.";
-    if (!form.where_lost.trim()) return "Please provide the location where it was lost.";
-    if (!form.agreeToTerms) return "Please agree to the Terms of Service to continue.";
-    return null;
-  }
+  const validation = useMemo(() => {
+  if (!form.owner_name.trim()) return "Please provide the owner's full name.";
+  if (!form.email.trim()) return "Please provide a contact email.";
+  if (!form.document_type) return "Please select a document type.";
+  if (!form.where_lost.trim()) return "Please provide the location where it was lost.";
+  if (!form.agreeToTerms) return "Please agree to the Terms of Service to continue.";
+  return null;
+}, [form.owner_name, form.email, form.document_type, form.where_lost, form.agreeToTerms]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: "info", message: "Submitting your report..." });
 
-    const err = validate();
+    const err = validation;
     if (err) {
       setStatus({ type: "error", message: err });
       setLoading(false);

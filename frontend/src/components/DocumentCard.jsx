@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { Calendar, MapPin, Hash, Eye, Crown, Star, X, Lock, CheckCircle, FileText, AlertCircle, User, Phone, Heart  } from "lucide-react";
+import { useState, memo, useCallback } from "react";
+import { Calendar, MapPin, Hash, Eye, Crown, X, Lock, CheckCircle, FileText, AlertCircle, User, Phone, Heart  } from "lucide-react";
 import ClaimForm from "./ClaimForm";
 import PremiumUpgradeModal from "./PremiumUpgradeModal";
 import axiosClient from "../api/axiosClient";
 import RemovalModal from "./RemovalModal";
 
 
-export default function DocumentCard({ document, type, onTabChange, id }) {
+const DocumentCard = memo(function DocumentCard({ document, type, onTabChange, id }) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -21,34 +21,33 @@ export default function DocumentCard({ document, type, onTabChange, id }) {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
   };
-
-  const handleVerification = async () => {
-    const input = verificationInput.trim();
+  const handleVerification = useCallback(async () => {
+  const input = verificationInput.trim();
+  
+  try {
+    const response = await axiosClient.post(`verify/${type}/${document.id}/`, {
+      verification_input: input
+    });
     
-    try {
-      const response = await axiosClient.post(`verify/${type}/${document.id}/`, {
-        verification_input: input
-      });
+    if (response.data.verified) {
+      setVerified(true);
+      setShowUnblurred(true);
+      setUnmaskedDocument(response.data.document);
       
-      if (response.data.verified) {
-        setVerified(true);
-        setShowUnblurred(true);
-        setUnmaskedDocument(response.data.document);
-        
-        setTimeout(() => {
-          setShowUnblurred(false);
-          setVerified(false);
-          setVerificationInput("");
-          setUnmaskedDocument(null);
-        }, 3000);
-      } else {
-        alert("Verification failed. Please enter the correct document number or owner name.");
-      }
-    } catch (error) {
-      console.error('Verification error:', error);
-      alert("Verification failed. Please try again.");
+      setTimeout(() => {
+        setShowUnblurred(false);
+        setVerified(false);
+        setVerificationInput("");
+        setUnmaskedDocument(null);
+      }, 3000);
+    } else {
+      alert("Verification failed. Please enter the correct document number or owner name.");
     }
-  };
+  } catch (error) {
+    console.error('Verification error:', error);
+    alert("Verification failed. Please try again.");
+  }
+}, [verificationInput, type, document.id]);
 
   const displayDocument = showUnblurred && unmaskedDocument ? unmaskedDocument : document;
 
@@ -63,6 +62,8 @@ export default function DocumentCard({ document, type, onTabChange, id }) {
               src={document.image} 
               alt={`${type} document`}
               className="w-full h-full object-cover filter blur-sm"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-black bg-opacity-15 flex items-center justify-center">
               <span className="bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-medium">
@@ -241,6 +242,8 @@ export default function DocumentCard({ document, type, onTabChange, id }) {
                   src={document.image} 
                   alt="Document (blurred for privacy)"
                   className="w-full h-full object-cover filter blur-lg"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                   <div className="bg-white p-6 rounded-xl text-center max-w-sm mx-4 shadow-lg">
@@ -478,4 +481,6 @@ export default function DocumentCard({ document, type, onTabChange, id }) {
       )}
     </>
   );
-}
+});
+
+export default DocumentCard;
