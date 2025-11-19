@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Heart, Upload, Calendar, MapPin, User, Mail, Phone, FileText, Hash, Camera } from "lucide-react";
 import axiosClient from "../api/axiosClient";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 const useDebounce = (callback, delay) => {
   const [debounceTimer, setDebounceTimer] = useState(null);
@@ -13,6 +14,7 @@ const useDebounce = (callback, delay) => {
 };
 
 export default function FoundDocumentForm() {
+  const { t } = useLanguage();
   const [types, setTypes] = useState([]);
   const [form, setForm] = useState({
     document_type: "",
@@ -48,12 +50,12 @@ export default function FoundDocumentForm() {
   }
 
   const handleInput = useCallback((e) => {
-  const { name, value, type, checked } = e.target;
-  setForm((p) => ({ 
-    ...p, 
-    [name]: type === 'checkbox' ? checked : value 
-  }));
-}, []);
+    const { name, value, type, checked } = e.target;
+    setForm((p) => ({ 
+      ...p, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
+  }, []);
 
   function handleFileChange(e) {
     const file = e.target.files?.[0] ?? null;
@@ -83,20 +85,19 @@ export default function FoundDocumentForm() {
   }
 
   const validation = useMemo(() => {
-    if (!form.document_type) return "Please select document type.";
-    if (!form.where_found.trim()) return "Please provide where you found it.";
-    if (!form.contact_full_name.trim()) return "Please provide your name so we can contact you.";
-    if (!form.contact_email.trim()) return "Please provide your email.";
-    if (!form.image) return "Please upload a photo of the document.";
-    if (!form.agreeToTerms) return "Please agree to the Terms of Service to continue.";
+    if (!form.document_type) return t('pleaseSelectDocumentType');
+    if (!form.where_found.trim()) return t('pleaseProvideWhereFound');
+    if (!form.contact_full_name.trim()) return t('pleaseProvideYourName');
+    if (!form.contact_email.trim()) return t('pleaseProvideYourEmail');
+    if (!form.image) return t('pleaseUploadPhoto');
+    if (!form.agreeToTerms) return t('pleaseAgreeToTerms');
     return null;
-  }, [form.document_type, form.where_found, form.contact_full_name, form.contact_email, form.image, form.agreeToTerms]);
-
+  }, [form.document_type, form.where_found, form.contact_full_name, form.contact_email, form.image, form.agreeToTerms, t]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setStatus({ type: "info", message: "Uploading found document..." });
+    setStatus({ type: "info", message: t('uploadingFoundDocument') });
 
     const err = validation;
     if (err) {
@@ -124,7 +125,7 @@ export default function FoundDocumentForm() {
 
       setStatus({ 
         type: "success", 
-        message: "✅ Found document uploaded successfully! We'll run matching and notify the owner if found." 
+        message: t('foundDocumentUploadSuccess')
       });
       
       // Reset form
@@ -145,7 +146,7 @@ export default function FoundDocumentForm() {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.detail || "Upload failed. Please try again.";
+      const msg = error.response?.data?.detail || t('uploadFailed');
       setStatus({ type: "error", message: msg });
     } finally {
       setLoading(false);
@@ -162,8 +163,8 @@ export default function FoundDocumentForm() {
               <Heart className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold">Upload Found Document</h2>
-              <p className="text-green-100 text-sm">Help reunite someone with their important document</p>
+              <h2 className="text-xl font-semibold">{t('uploadFoundDocument')}</h2>
+              <p className="text-green-100 text-sm">{t('helpReuniteSomeone')}</p>
             </div>
           </div>
         </div>
@@ -177,8 +178,8 @@ export default function FoundDocumentForm() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-amber-800">Privacy Protection</p>
-              <p className="text-xs text-amber-600 mt-1">For privacy, sensitive details are blurred and only partial info is shown. Full details are visible only after ownership verification.</p>
+              <p className="text-sm font-medium text-amber-800">{t('privacyProtection')}</p>
+              <p className="text-xs text-amber-600 mt-1">{t('privacyProtectionDesc')}</p>
             </div>
           </div>
         </div>
@@ -188,7 +189,7 @@ export default function FoundDocumentForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
               <Camera className="w-5 h-5 text-gray-500" />
-              <span>Document Photo *</span>
+              <span>{t('documentPhoto')} *</span>
             </h3>
             
             <div
@@ -202,18 +203,18 @@ export default function FoundDocumentForm() {
               {!previewUrl ? (
                 <div className="space-y-2">
                   <Upload className="mx-auto w-8 h-8 text-gray-400" />
-                  <div className="text-sm font-medium text-gray-600">Upload Document Photo</div>
+                  <div className="text-sm font-medium text-gray-600">{t('uploadDocumentPhoto')}</div>
                   <div className="text-xs text-gray-500">
-                    JPG, PNG up to 10MB • Drag & drop or click to browse
+                    {t('uploadInstructions')}
                   </div>
                   <div className="text-xs text-amber-600">
-                    ⚠️ Sensitive info is blurred for privacy.
+                    {t('sensitiveInfoBlurred')}
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3">
                   <img src={previewUrl} alt="Preview" className="mx-auto max-h-32 object-contain rounded-lg" />
-                  <div className="text-sm text-gray-600">Click to replace image</div>
+                  <div className="text-sm text-gray-600">{t('clickToReplace')}</div>
                 </div>
               )}
               <input
@@ -231,13 +232,13 @@ export default function FoundDocumentForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
               <FileText className="w-5 h-5 text-gray-500" />
-              <span>Document Information</span>
+              <span>{t('documentInformation')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Document Type *
+                  {t('documentType')} *
                 </label>
                 <select
                   name="document_type"
@@ -246,7 +247,7 @@ export default function FoundDocumentForm() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                   required
                 >
-                  <option value="">Select document type</option>
+                  <option value="">{t('selectDocumentType')}</option>
                   {types.map((t) => (
                     <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
@@ -255,7 +256,7 @@ export default function FoundDocumentForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name on Document
+                  {t('nameOnDocument')}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -264,7 +265,7 @@ export default function FoundDocumentForm() {
                     value={form.found_name}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                    placeholder="Name as it appears on document"
+                    placeholder={t('nameOnDocumentPlaceholder')}
                   />
                 </div>
               </div>
@@ -272,7 +273,7 @@ export default function FoundDocumentForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Document Number
+                {t('documentNumber')}
               </label>
               <div className="relative">
                 <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -281,7 +282,7 @@ export default function FoundDocumentForm() {
                   value={form.document_number}
                   onChange={handleInput}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                  placeholder="Document ID number (if visible)"
+                  placeholder={t('documentNumberFoundPlaceholder')}
                 />
               </div>
             </div>
@@ -291,13 +292,13 @@ export default function FoundDocumentForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
               <MapPin className="w-5 h-5 text-gray-500" />
-              <span>Where & When Found</span>
+              <span>{t('whereWhenFound')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Where did you find it? *
+                  {t('whereDidYouFindIt')} *
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -306,7 +307,7 @@ export default function FoundDocumentForm() {
                     value={form.where_found}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                    placeholder="City, neighborhood, or specific location"
+                    placeholder={t('locationFoundPlaceholder')}
                     required
                   />
                 </div>
@@ -314,7 +315,7 @@ export default function FoundDocumentForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  When did you find it?
+                  {t('whenDidYouFindIt')}
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -331,7 +332,7 @@ export default function FoundDocumentForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Additional Description
+                {t('additionalDescription')}
               </label>
               <textarea
                 name="description"
@@ -339,7 +340,7 @@ export default function FoundDocumentForm() {
                 onChange={handleInput}
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none"
-                placeholder="Any additional details about where or how you found it..."
+                placeholder={t('additionalDescriptionFoundPlaceholder')}
               />
             </div>
           </div>
@@ -348,13 +349,13 @@ export default function FoundDocumentForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
               <User className="w-5 h-5 text-gray-500" />
-              <span>Your Contact Information</span>
+              <span>{t('yourContactInformation')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Name *
+                  {t('yourName')} *
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -363,7 +364,7 @@ export default function FoundDocumentForm() {
                     value={form.contact_full_name}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                    placeholder="Your full name"
+                    placeholder={t('yourFullNamePlaceholder')}
                     required
                   />
                 </div>
@@ -371,7 +372,7 @@ export default function FoundDocumentForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Email *
+                  {t('yourEmail')} *
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -381,7 +382,7 @@ export default function FoundDocumentForm() {
                     value={form.contact_email}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                    placeholder="your.email@example.com"
+                    placeholder={t('emailPlaceholder')}
                     required
                   />
                 </div>
@@ -390,7 +391,7 @@ export default function FoundDocumentForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Phone Number
+                {t('yourPhoneNumber')}
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -399,12 +400,13 @@ export default function FoundDocumentForm() {
                   value={form.contact_phone}
                   onChange={handleInput}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                  placeholder="+250 7xx xxx xxx"
+                  placeholder={t('phonePlaceholder')}
                 />
               </div>
             </div>
           </div>
-           {/* Terms Agreement */}
+
+          {/* Terms Agreement */}
           <div className="pt-4">
             <div className="flex items-start gap-3">
               <input
@@ -417,15 +419,15 @@ export default function FoundDocumentForm() {
                 required
               />
               <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
-                I agree to the{" "}
+                {t('agreeToTermsText')}{" "}
                 <a 
                   href="/terms" 
                   target="_blank" 
                   className="text-green-600 hover:text-green-700 underline font-medium"
                 >
-                  Terms of Service
+                  {t('termsOfService')}
                 </a>{" "}
-                and understand that my information will be used to help return this document to its owner.
+                {t('agreeToTermsFoundEnd')}
               </label>
             </div>
           </div>
@@ -453,12 +455,12 @@ export default function FoundDocumentForm() {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  <span>Uploading...</span>
+                  <span>{t('uploading')}</span>
                 </>
               ) : (
                 <>
                   <Heart className="w-4 h-4" />
-                  <span>Submit Found Document</span>
+                  <span>{t('submitFoundDocument')}</span>
                 </>
               )}
             </button>

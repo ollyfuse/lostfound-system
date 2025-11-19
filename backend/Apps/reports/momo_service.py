@@ -19,11 +19,11 @@ class MTNMoMoService:
 
         # Debug logging
         logger.info(f"API User: {self.api_user}")
-        logger.info(f"API Key: {self.api_key[:8]}...")  # Only show first 8 chars
+        logger.info(f"API Key: {self.api_key[:8]}...")  # Only  first 8 chars
         logger.info(f"Subscription Key: {self.subscription_key[:8]}...")
 
         
-        # Create basic auth header
+        # basic auth header
         credentials = f"{self.api_user}:{self.api_key}"
         encoded_credentials = base64.b64encode(credentials.encode()).decode()
         

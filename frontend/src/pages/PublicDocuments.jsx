@@ -2,8 +2,10 @@ import { useEffect, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, FileText, AlertCircle } from "lucide-react";
 import axiosClient from "../api/axiosClient";
 import DocumentCard from "../components/DocumentCard";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 export default function PublicDocuments({onTabChange}) {
+  const { t } = useLanguage();
   const [lostDocs, setLostDocs] = useState([]);
   const [foundDocs, setFoundDocs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,21 +67,21 @@ export default function PublicDocuments({onTabChange}) {
     return [...rotatedPremium, ...regularDocs];
   }, [activeTab, lostDocs, foundDocs, rotationIndex]);
 
-    const premiumCount = useMemo(() => 
-      lostDocs.filter(doc => doc.is_premium).length, 
-      [lostDocs]
-      );
+  const premiumCount = useMemo(() => 
+    lostDocs.filter(doc => doc.is_premium).length, 
+    [lostDocs]
+  );
 
-      const paginationData = useMemo(() => ({
-        totalPages: Math.ceil(sortedDocs.length / itemsPerPage),
-        startIndex: (currentPage - 1) * itemsPerPage,
-        endIndex: (currentPage - 1) * itemsPerPage + itemsPerPage
-      }), [sortedDocs.length, currentPage]);
+  const paginationData = useMemo(() => ({
+    totalPages: Math.ceil(sortedDocs.length / itemsPerPage),
+    startIndex: (currentPage - 1) * itemsPerPage,
+    endIndex: (currentPage - 1) * itemsPerPage + itemsPerPage
+  }), [sortedDocs.length, currentPage]);
 
-      const currentItems = useMemo(() => 
-        sortedDocs.slice(paginationData.startIndex, paginationData.endIndex),
-        [sortedDocs, paginationData.startIndex, paginationData.endIndex]
-      );
+  const currentItems = useMemo(() => 
+    sortedDocs.slice(paginationData.startIndex, paginationData.endIndex),
+    [sortedDocs, paginationData.startIndex, paginationData.endIndex]
+  );
 
   // Handle tab changes and hash navigation
   useEffect(() => {
@@ -120,7 +122,7 @@ export default function PublicDocuments({onTabChange}) {
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading documents...</p>
+          <p className="text-gray-600">{t('loadingDocuments')}</p>
         </div>
       </div>
     );
@@ -131,10 +133,10 @@ export default function PublicDocuments({onTabChange}) {
       {/* Enhanced Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-3">
-         Recently Reported and Found Documents
+          {t('recentlyReportedAndFound')}
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-4">
-          Browse the latest documents reported as lost or successfully recovered. Stay informed and see if your document has been listed or matched with its rightful owner. For your security, all personal details are blurred and remain protected until verification is complete
+          {t('browseLatestDocuments')}
         </p>
       </div>
 
@@ -152,7 +154,7 @@ export default function PublicDocuments({onTabChange}) {
             >
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                <span>Found Documents</span>
+                <span>{t('foundDocuments')}</span>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                   activeTab === "found" 
                     ? "bg-green-100 text-green-700" 
@@ -172,7 +174,7 @@ export default function PublicDocuments({onTabChange}) {
             >
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
-                <span>Lost Reports</span>
+                <span>{t('lostReports')}</span>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                   activeTab === "lost" 
                     ? "bg-red-100 text-red-700" 
@@ -189,8 +191,8 @@ export default function PublicDocuments({onTabChange}) {
         <div className="text-center">
           <p className="text-sm text-gray-600 max-w-2xl mx-auto">
             {activeTab === "found" 
-              ? "Documents that have been found and reported by community members. Contact details are available after verification."
-              : "Missing documents reported by their owners. Help reunite people with their important documents."
+              ? t('foundDocumentsDescription')
+              : t('lostDocumentsDescription')
             }
           </p>
         </div>
@@ -201,7 +203,7 @@ export default function PublicDocuments({onTabChange}) {
             <div className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-full px-4 py-2">
               <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
               <span className="text-xs text-yellow-700 font-medium">
-                Premium listings rotate every 30 secs
+                {t('premiumListingsRotate')}
               </span>
             </div>
           </div>
@@ -237,7 +239,7 @@ export default function PublicDocuments({onTabChange}) {
               }`}
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
+              {t('previous')}
             </button>
 
             <div className="flex space-x-1">
@@ -265,13 +267,17 @@ export default function PublicDocuments({onTabChange}) {
                   : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100 border border-gray-200'
               }`}
             >
-              Next
+              {t('next')}
               <ChevronRight className="w-4 h-4 ml-1" />
             </button>
           </div>
 
           <div className="text-sm text-gray-500">
-            Showing {startIndex + 1}-{Math.min(endIndex, sortedDocs.length)} of {sortedDocs.length} documents
+            {t('showingResults', {
+              start: startIndex + 1,
+              end: Math.min(endIndex, sortedDocs.length),
+              total: sortedDocs.length
+            })}
           </div>
         </div>
       )}
@@ -287,25 +293,28 @@ export default function PublicDocuments({onTabChange}) {
             )}
           </div>
           <h3 className="text-2xl font-semibold text-gray-700 mb-3">
-            No {activeTab} documents yet
+            {t('noDocumentsYet', { type: activeTab })}
           </h3>
           <p className="text-gray-500 mb-8 max-w-md mx-auto">
             {activeTab === "found"
-              ? "Be the first to help by reporting found documents. Every document returned makes a difference."
-              : "No missing documents reported yet. Help spread the word about this service."}
+              ? t('noFoundDocumentsMessage')
+              : t('noLostDocumentsMessage')
+            }
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
               onClick={() => setActiveTab(activeTab === "found" ? "lost" : "found")}
               className="px-6 py-2 text-blue-600 hover:text-blue-800 font-medium border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
             >
-              View {activeTab === "found" ? "Lost Reports" : "Found Documents"}
+              {t('viewOtherTab', { 
+                type: activeTab === "found" ? t('lostReports') : t('foundDocuments')
+              })}
             </button>
             <button 
               onClick={() => onTabChange(activeTab === "found" ? "upload-found" : "report-lost")}
               className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
             >
-              {activeTab === "found" ? "Report Found Document" : "Report Lost Document"}
+              {activeTab === "found" ? t('reportFoundDocument') : t('reportLostDocument')}
             </button>
           </div>
         </div>

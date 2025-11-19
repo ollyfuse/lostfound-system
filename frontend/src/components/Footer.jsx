@@ -1,6 +1,9 @@
 import { FileText, Mail, Phone, Github, Twitter, Linkedin } from "lucide-react";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="bg-gray-900 text-white mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -12,13 +15,12 @@ export default function Footer() {
                 <FileText className="text-white w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold">DocuFind</h3>
-                <p className="text-sm text-gray-400">Lost & Found Documents</p>
+                <h3 className="text-xl font-semibold">{t('docuFind')}</h3>
+                <p className="text-sm text-gray-400">{t('lostFoundDocuments')}</p>
               </div>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
-              A secure platform helping people reunite with their important documents. 
-              Your privacy is protected while making recovery possible.
+              {t('footerDescription')}
             </p>
             <div className="flex space-x-4">
               <a href="https://github.com/ollyfuse" className="text-gray-400 hover:text-white transition">
@@ -35,23 +37,23 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
+            <h4 className="font-semibold mb-4">{t('quickLinks')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Browse Documents</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Report Lost</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Upload Found</a></li>
-              <li><a href="/how-it-works" className="text-gray-300 hover:text-white transition">How It Works</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition">{t('browseDocuments')}</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition">{t('reportLost')}</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition">{t('uploadFound')}</a></li>
+              <li><a href="/how-it-works" className="text-gray-300 hover:text-white transition">{t('howItWorks')}</a></li>
             </ul>
           </div>
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold mb-4">Support</h4>
+            <h4 className="font-semibold mb-4">{t('support')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/help" className="text-gray-300 hover:text-white transition">Help Center</a></li>
-              <li><a href="/privacy" className="text-gray-300 hover:text-white transition">Privacy Policy</a></li>
-              <li><a href="/terms" className="text-gray-300 hover:text-white transition">Terms of Service</a></li>
-              <li><a href="/contact" className="text-gray-300 hover:text-white transition">Contact Us</a></li>
+              <li><a href="/help" className="text-gray-300 hover:text-white transition">{t('helpCenter')}</a></li>
+              <li><a href="/privacy" className="text-gray-300 hover:text-white transition">{t('privacyPolicy')}</a></li>
+              <li><a href="/terms" className="text-gray-300 hover:text-white transition">{t('termsOfService')}</a></li>
+              <li><a href="/contact" className="text-gray-300 hover:text-white transition">{t('contactUs')}</a></li>
             </ul>
           </div>
         </div>
@@ -59,16 +61,16 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-400">
-            © 2025 DocuFind. All rights reserved.
+            {t('copyright')}
           </p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0 text-sm text-gray-400">
             <div className="flex items-center space-x-1">
               <Mail className="w-4 h-4" />
-              <span>support@docufind.com</span>
+              <span>{t('supportEmail')}</span>
             </div>
             <div className="flex items-center space-x-1">
               <Phone className="w-4 h-4" />
-              <span>+250 780286626</span>
+              <span>{t('supportPhone')}</span>
             </div>
           </div>
         </div>

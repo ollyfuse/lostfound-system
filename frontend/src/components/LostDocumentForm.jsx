@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { FileText, Upload, Calendar, MapPin, User, Mail, Phone, Hash } from "lucide-react";
 import axiosClient from "../api/axiosClient";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 const useDebounce = (callback, delay) => {
   const [debounceTimer, setDebounceTimer] = useState(null);
@@ -13,6 +14,7 @@ const useDebounce = (callback, delay) => {
 };
 
 export default function LostDocumentForm() {
+  const { t } = useLanguage();
   const [types, setTypes] = useState([]);
   const [form, setForm] = useState({
     owner_name: "",
@@ -48,12 +50,12 @@ export default function LostDocumentForm() {
   }
 
   const handleInput = useCallback((e) => {
-  const { name, value, type, checked } = e.target;
-  setForm((p) => ({ 
-    ...p, 
-    [name]: type === 'checkbox' ? checked : value 
-  }));
-}, []);
+    const { name, value, type, checked } = e.target;
+    setForm((p) => ({ 
+      ...p, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
+  }, []);
 
   function handleFileChange(e) {
     const file = e.target.files?.[0] ?? null;
@@ -83,18 +85,18 @@ export default function LostDocumentForm() {
   }
 
   const validation = useMemo(() => {
-  if (!form.owner_name.trim()) return "Please provide the owner's full name.";
-  if (!form.email.trim()) return "Please provide a contact email.";
-  if (!form.document_type) return "Please select a document type.";
-  if (!form.where_lost.trim()) return "Please provide the location where it was lost.";
-  if (!form.agreeToTerms) return "Please agree to the Terms of Service to continue.";
-  return null;
-}, [form.owner_name, form.email, form.document_type, form.where_lost, form.agreeToTerms]);
+    if (!form.owner_name.trim()) return t('pleaseProvideOwnerName');
+    if (!form.email.trim()) return t('pleaseProvideEmail');
+    if (!form.document_type) return t('pleaseSelectDocumentType');
+    if (!form.where_lost.trim()) return t('pleaseProvideLocation');
+    if (!form.agreeToTerms) return t('pleaseAgreeToTerms');
+    return null;
+  }, [form.owner_name, form.email, form.document_type, form.where_lost, form.agreeToTerms, t]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setStatus({ type: "info", message: "Submitting your report..." });
+    setStatus({ type: "info", message: t('submittingReport') });
 
     const err = validation;
     if (err) {
@@ -123,7 +125,7 @@ export default function LostDocumentForm() {
 
       setStatus({ 
         type: "success", 
-        message: "✅ Lost document reported successfully! We'll notify you if there's a match." 
+        message: t('submissionSuccess')
       });
       
       // Reset form
@@ -144,7 +146,7 @@ export default function LostDocumentForm() {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.detail || "Failed to submit. Please try again.";
+      const msg = error.response?.data?.detail || t('submissionError');
       setStatus({ type: "error", message: msg });
     } finally {
       setLoading(false);
@@ -161,8 +163,8 @@ export default function LostDocumentForm() {
               <FileText className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold">Report Lost Document</h2>
-              <p className="text-red-100 text-sm">Help us help you find your important documents</p>
+              <h2 className="text-xl font-semibold">{t('reportLostDocument')}</h2>
+              <p className="text-red-100 text-sm">{t('helpUsHelpYou')}</p>
             </div>
           </div>
         </div>
@@ -176,8 +178,8 @@ export default function LostDocumentForm() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-blue-800">Your Privacy is Protected</p>
-              <p className="text-xs text-blue-600 mt-1">Only partial details will be visible to others to protect your personal information.</p>
+              <p className="text-sm font-medium text-blue-800">{t('privacyProtected')}</p>
+              <p className="text-xs text-blue-600 mt-1">{t('privacyNotice')}</p>
             </div>
           </div>
         </div>
@@ -187,13 +189,13 @@ export default function LostDocumentForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
               <User className="w-5 h-5 text-gray-500" />
-              <span>Personal Information</span>
+              <span>{t('personalInformation')}</span>
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
+                  {t('fullName')} *
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -202,7 +204,7 @@ export default function LostDocumentForm() {
                     value={form.owner_name}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-                    placeholder="Enter your full name"
+                    placeholder={t('fullNamePlaceholder')}
                     required
                   />
                 </div>
@@ -210,7 +212,7 @@ export default function LostDocumentForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address *
+                  {t('email')} *
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -220,7 +222,7 @@ export default function LostDocumentForm() {
                     value={form.email}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-                    placeholder="your.email@example.com"
+                    placeholder={t('emailPlaceholder')}
                     required
                   />
                 </div>
@@ -229,7 +231,7 @@ export default function LostDocumentForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
+                {t('phone')}
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -238,7 +240,7 @@ export default function LostDocumentForm() {
                   value={form.phone}
                   onChange={handleInput}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-                  placeholder="+250 7xx xxx xxx"
+                  placeholder={t('phonePlaceholder')}
                 />
               </div>
             </div>
@@ -248,13 +250,13 @@ export default function LostDocumentForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
               <FileText className="w-5 h-5 text-gray-500" />
-              <span>Document Information</span>
+              <span>{t('documentInformation')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Document Type *
+                  {t('documentType')} *
                 </label>
                 <select
                   name="document_type"
@@ -263,7 +265,7 @@ export default function LostDocumentForm() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
                   required
                 >
-                  <option value="">Select document type</option>
+                  <option value="">{t('selectDocumentType')}</option>
                   {types.map((t) => (
                     <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
@@ -272,7 +274,7 @@ export default function LostDocumentForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Document Number
+                  {t('documentNumber')}
                 </label>
                 <div className="relative">
                   <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -281,7 +283,7 @@ export default function LostDocumentForm() {
                     value={form.document_number}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-                    placeholder="Document ID number"
+                    placeholder={t('documentNumberPlaceholder')}
                   />
                 </div>
               </div>
@@ -289,7 +291,7 @@ export default function LostDocumentForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Issue Date
+                {t('issueDate')}
               </label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -306,7 +308,7 @@ export default function LostDocumentForm() {
             {/* File Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Document Photo (Optional)
+                {t('uploadImage')}
               </label>
               <div
                 ref={uploadDropRef}
@@ -319,18 +321,18 @@ export default function LostDocumentForm() {
                 {!previewUrl ? (
                   <div className="space-y-2">
                     <Upload className="mx-auto w-8 h-8 text-gray-400" />
-                    <div className="text-sm font-medium text-gray-600">Upload Document Photo</div>
+                    <div className="text-sm font-medium text-gray-600">{t('uploadDocumentPhoto')}</div>
                     <div className="text-xs text-gray-500">
-                      JPG, PNG up to 10MB • Drag & drop or click to browse
+                      {t('uploadInstructions')}
                     </div>
                     <div className="text-xs text-blue-600">
-                      Sensitive information will be automatically protected
+                      {t('sensitiveInfoProtected')}
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <img src={previewUrl} alt="Preview" className="mx-auto max-h-32 object-contain rounded-lg" />
-                    <div className="text-sm text-gray-600">Click to replace image</div>
+                    <div className="text-sm text-gray-600">{t('clickToReplace')}</div>
                   </div>
                 )}
                 <input
@@ -348,13 +350,13 @@ export default function LostDocumentForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
               <MapPin className="w-5 h-5 text-gray-500" />
-              <span>Loss Information</span>
+              <span>{t('lossInformation')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Where was it lost? *
+                  {t('locationLost')} *
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -363,7 +365,7 @@ export default function LostDocumentForm() {
                     value={form.where_lost}
                     onChange={handleInput}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-                    placeholder="City, neighborhood, or specific location"
+                    placeholder={t('locationLostPlaceholder')}
                     required
                   />
                 </div>
@@ -371,7 +373,7 @@ export default function LostDocumentForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  When was it lost?
+                  {t('dateLost')}
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -388,7 +390,7 @@ export default function LostDocumentForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Additional Description
+                {t('description')}
               </label>
               <textarea
                 name="description"
@@ -396,34 +398,35 @@ export default function LostDocumentForm() {
                 onChange={handleInput}
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition resize-none"
-                placeholder="Any additional details that might help identify your document..."
+                placeholder={t('descriptionPlaceholder')}
               />
             </div>
           </div>
+
           <div className="pt-4">
-  <div className="flex items-start gap-3">
-    <input
-      type="checkbox"
-      id="agreeToTerms"
-      name="agreeToTerms"
-      checked={form.agreeToTerms}
-      onChange={handleInput}
-      className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-      required
-    />
-    <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
-      I agree to the{" "}
-      <a 
-        href="/terms" 
-        target="_blank" 
-        className="text-red-600 hover:text-red-700 underline font-medium"
-      >
-        Terms of Service
-      </a>{" "}
-      and understand that my information will be used to help recover my lost document.
-    </label>
-  </div>
-</div>
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="agreeToTerms"
+                name="agreeToTerms"
+                checked={form.agreeToTerms}
+                onChange={handleInput}
+                className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                required
+              />
+              <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
+                {t('agreeToTermsText')}{" "}
+                <a 
+                  href="/terms" 
+                  target="_blank" 
+                  className="text-red-600 hover:text-red-700 underline font-medium"
+                >
+                  {t('termsOfService')}
+                </a>{" "}
+                {t('agreeToTermsEnd')}
+              </label>
+            </div>
+          </div>
 
           {/* Status Message */}
           {status.type && (
@@ -448,12 +451,12 @@ export default function LostDocumentForm() {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  <span>Submitting...</span>
+                  <span>{t('submitting')}</span>
                 </>
               ) : (
                 <>
                   <FileText className="w-4 h-4" />
-                  <span>Submit Lost Document Report</span>
+                  <span>{t('submitLostDocumentReport')}</span>
                 </>
               )}
             </button>

@@ -15,8 +15,11 @@ const TermsOfService = lazy(() => import("./components/TermsOfService"));
 const HelpCenter = lazy(() => import("./components/HelpCenter"));
 const HowItWorks = lazy(() => import("./components/HowItWorks"));
 const ContactUs = lazy(() => import("./components/ContactUs"));
+import { LanguageProvider, useLanguage } from './i18n/LanguageContext.jsx';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery, setSearchQuery, handleTabChange }) {
+  const { t } = useLanguage();
   const [results, setResults] = useState({ lost: [], found: [] });
   const [loading, setLoading] = useState(false);
 
@@ -84,7 +87,7 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
       <div className="relative bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[80vh] overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">Search Documents</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{t('searchDocuments')}</h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full transition"
@@ -97,7 +100,7 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
             <Search className="w-5 h-5 text-gray-500" />
             <input
               type="text"
-              placeholder="Search by name, document type, or ID number..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 bg-transparent outline-none px-3 text-gray-700"
@@ -110,7 +113,7 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
           {loading && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Searching...</p>
+              <p className="text-gray-600">{t('searching')}</p>
             </div>
           )}
 
@@ -118,10 +121,10 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
             <div className="text-center py-12">
               <div className="text-4xl mb-4">🔍</div>
               <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                No documents found
+                {t('noDocumentsFound')}
               </h3>
               <p className="text-gray-500">
-                No documents match your search for "{searchQuery}"
+                {t('noMatchesFor')} "{searchQuery}"
               </p>
             </div>
           )}
@@ -130,14 +133,14 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
             <div>
               <div className="mb-4">
                 <p className="text-gray-600">
-                  Found {totalResults} document{totalResults !== 1 ? 's' : ''}
+                  {t('found')} {totalResults} {t('document')}{totalResults !== 1 ? 's' : ''}
                 </p>
               </div>
 
               {results.found.length > 0 && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-green-700 mb-3">
-                    Found Documents ({results.found.length})
+                    {t('foundDocuments')} ({results.found.length})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {results.found.slice(0, 4).map((doc) => (
@@ -148,7 +151,7 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
                   </div>
                   {results.found.length > 4 && (
                     <p className="text-sm text-gray-500 mt-2">
-                      And {results.found.length - 4} more found documents...
+                      {t('andMore')} {results.found.length - 4} {t('moreFoundDocuments')}
                     </p>
                   )}
                 </div>
@@ -157,7 +160,7 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
               {results.lost.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-red-700 mb-3">
-                    Lost Reports ({results.lost.length})
+                    {t('lostReports')} ({results.lost.length})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {results.lost.slice(0, 4).map((doc) => (
@@ -168,7 +171,7 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
                   </div>
                   {results.lost.length > 4 && (
                     <p className="text-sm text-gray-500 mt-2">
-                      And {results.lost.length - 4} more lost reports...
+                      {t('andMore')} {results.lost.length - 4} {t('moreLostReports')}
                     </p>
                   )}
                 </div>
@@ -180,10 +183,10 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
             <div className="text-center py-12">
               <div className="text-4xl mb-4">🔍</div>
               <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                Start typing to search
+                {t('startTypingToSearch')}
               </h3>
               <p className="text-gray-500">
-                Search for documents by name, type, or ID number
+                {t('searchByNameType')}
               </p>
             </div>
           )}
@@ -194,6 +197,7 @@ const SearchOverlay = memo(function SearchOverlay({ isOpen, onClose, searchQuery
 });
 
 function HomePage() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("browse");
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
@@ -246,10 +250,10 @@ function HomePage() {
         return (
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-2 text-gray-800">
-              Report Lost Document
+              {t('reportLostDocument')}
             </h2>
             <h4 className="text-1xl text-center mb-6 text-gray-400">
-            Provide details about your lost document to help others identify and contact you.
+              {t('reportLostDesc')}
             </h4>
             <LostDocumentForm />
           </div>
@@ -258,80 +262,78 @@ function HomePage() {
         return (
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-2 text-gray-800">
-              Upload Found Document
+              {t('uploadFoundDocument')}
             </h2>
-            <h4 className="text-1xl text-center mb-6 text-gray-400">Help someone recover their important document by uploading what you found.</h4>
+            <h4 className="text-1xl text-center mb-6 text-gray-400">{t('uploadFoundDesc')}</h4>
             <FoundDocumentForm />
           </div>
         );
       default:
         return <PublicDocuments onTabChange={handleTabChange}/>;
     }
-  }, [activeTab, handleTabChange]);
+  }, [activeTab, handleTabChange, t]);
 
   return (
     <div className="min-h-screen bg-[#f7f9fc] flex flex-col">
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm sticky top-0 z-50">
-  <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0">
-    <div className="flex items-center space-x-3">
-      <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2.5 rounded-xl shadow-md">
-        <FileText className="text-white w-6 h-6" />
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800 leading-tight">
-          DocuFind
-        </h1>
-        <p className="text-sm text-slate-500 -mt-0.5">
-          Lost & Found Documents
-        </p>
-      </div>
-    </div>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2.5 rounded-xl shadow-md">
+              <FileText className="text-white w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800 leading-tight">
+                {t('docuFind')}
+              </h1>
+              <p className="text-sm text-slate-500 -mt-0.5">
+                {t('lostFoundDocuments')}
+              </p>
+            </div>
+          </div>
 
-    <div className="flex-1 max-w-2xl w-full">
-      <div 
-        onClick={handleSearchFocus}
-        className="flex items-center bg-slate-50 rounded-xl px-5 py-3 shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-100 hover:shadow-md transition-all duration-200"
-      >
-        <Search className="w-5 h-5 text-slate-400" />
-        <input
-          type="text"
-          placeholder="Search by name, document type, or ID number..."
-          className="flex-1 bg-transparent outline-none px-3 text-slate-700 text-sm cursor-pointer placeholder-slate-400"
-          readOnly
-        />
-      </div>
-    </div>
+          <div className="flex-1 max-w-2xl w-full">
+            <div 
+              onClick={handleSearchFocus}
+              className="flex items-center bg-slate-50 rounded-xl px-5 py-3 shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-100 hover:shadow-md transition-all duration-200"
+            >
+              <Search className="w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder={t('searchPlaceholder')}
+                className="flex-1 bg-transparent outline-none px-3 text-slate-700 text-sm cursor-pointer placeholder-slate-400"
+                readOnly
+              />
+            </div>
+          </div>
 
-    <div className="flex items-center space-x-3">
-      <button
-        onClick={() => handleTabChange("report-lost")}
-        className="flex items-center space-x-2 border border-slate-300 text-slate-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all duration-200"
-      >
-        <Plus className="w-4 h-4" />
-        <span>Report Lost</span>
-      </button>
-      <button
-        onClick={() => handleTabChange("upload-found")}
-        className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-      >
-        <Upload className="w-4 h-4" />
-        <span>Upload Found</span>
-      </button>
-    </div>
-  </div>
-</header>
-
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => handleTabChange("report-lost")}
+              className="flex items-center space-x-2 border border-slate-300 text-slate-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all duration-200"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t('reportLost')}</span>
+            </button>
+            <button
+              onClick={() => handleTabChange("upload-found")}
+              className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              <Upload className="w-4 h-4" />
+              <span>{t('uploadFound')}</span>
+            </button>
+            <LanguageSwitcher />
+          </div>
+        </div>
+      </header>
 
       <main className="flex-grow">
         <section className="text-center py-16 bg-gradient-to-b from-[#e8f2ff] to-[#f7f9fc]">
           <h2 className="text-3xl md:text-5xl font-bold text-gray-800 leading-tight">
-            Reuniting People with Their{" "}
-            <span className="text-blue-600">Important Documents</span>
+            {t('heroTitle')}{" "}
+            <span className="text-blue-600">{t('importantDocuments')}</span>
           </h2>
           <p className="max-w-2xl mx-auto mt-4 text-gray-600 text-base md:text-lg">
-            A secure platform where you can report lost documents and help
-            others find theirs. Your privacy is protected while making recovery
-            possible.
+            {t('heroDescription')}
           </p>
 
           <div className="mt-8 flex justify-center space-x-3">
@@ -340,14 +342,14 @@ function HomePage() {
               className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-3 rounded-md transition shadow-sm"
             >
               <FileText className="w-5 h-5 mr-2" />
-              Report Lost Document
+              {t('reportLostDocument')}
             </button>
             <button
               onClick={() => handleTabChange("upload-found")}
               className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-3 rounded-md transition shadow-sm"
             >
               <Heart className="w-5 h-5 mr-2" />
-              Help Someone Find Theirs
+              {t('helpSomeoneFind')}
             </button>
           </div>
         </section>
@@ -355,122 +357,117 @@ function HomePage() {
         <section className="py-8 bg-gray-50">
           <div className="max-w-4xl mx-auto px-4">
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">How It Works</h3>
-              <p className="text-gray-600">Simple steps to reunite documents</p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">{t('howItWorks')}</h3>
+              <p className="text-gray-600">{t('simpleSteps')}</p>
             </div>
-          <div className="flex justify-center items-center gap-12">
-            <div className="hidden lg:block space-y-4">
-              <div className="flex items-center gap-3 text-gray-600">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <CheckCircle className="w-4 h-4 text-blue-600" />
+            <div className="flex justify-center items-center gap-12">
+              <div className="hidden lg:block space-y-4">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="bg-blue-100 p-2 rounded-full">
+                    <CheckCircle className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm">{t('privacyProtected')}</span>
                 </div>
-                <span className="text-sm">Privacy Protected</span>
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <Heart className="w-4 h-4 text-green-600" />
+                  </div>
+                  <span className="text-sm">{t('communityDriven')}</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="bg-purple-100 p-2 rounded-full">
+                    <Search className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <span className="text-sm">{t('smartMatching')}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <div className="bg-green-100 p-2 rounded-full">
-                  <Heart className="w-4 h-4 text-green-600" />
+
+              <div className="flex justify-center">
+                <div className="relative w-80 h-48">
+                  <div 
+                    className="absolute top-0 left-0 w-64 h-36 bg-blue-500 rounded-lg shadow-xl transform z-40"
+                    style={{
+                      animation: 'cardCycle1 12s ease-in-out infinite'
+                    }}
+                  >
+                    <div className="p-3 text-white">
+                      <FileText className="w-5 h-5 mb-1" />
+                      <h4 className="font-bold text-sm">1. {t('report')}</h4>
+                      <p className="text-xs opacity-90">{t('reportDesc')}</p>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className="absolute top-2 left-2 w-64 h-36 bg-green-500 rounded-lg shadow-lg transform z-30"
+                    style={{
+                      animation: 'cardCycle2 12s ease-in-out infinite'
+                    }}
+                  >
+                    <div className="p-3 text-white">
+                      <Upload className="w-5 h-5 mb-1" />
+                      <h4 className="font-bold text-sm">2. {t('upload')}</h4>
+                      <p className="text-xs opacity-90">{t('uploadDesc')}</p>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className="absolute top-4 left-4 w-64 h-36 bg-purple-500 rounded-lg shadow-lg transform z-20"
+                    style={{
+                      animation: 'cardCycle3 12s ease-in-out infinite'
+                    }}
+                  >
+                    <div className="p-3 text-white">
+                      <Search className="w-5 h-5 mb-1" />
+                      <h4 className="font-bold text-sm">3. {t('match')}</h4>
+                      <p className="text-xs opacity-90">{t('matchDesc')}</p>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className="absolute top-6 left-6 w-64 h-36 bg-orange-400 rounded-lg shadow-lg transform z-10"
+                    style={{
+                      animation: 'cardCycle4 12s ease-in-out infinite'
+                    }}
+                  >
+                    <div className="p-3 text-white">
+                      <Heart className="w-5 h-5 mb-1" />
+                      <h4 className="font-bold text-sm">4. {t('reunite')}</h4>
+                      <p className="text-xs opacity-90">{t('reuniteDesc')}</p>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-sm">Community Driven</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <Search className="w-4 h-4 text-purple-600" />
+
+              <div className="hidden lg:block space-y-4">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <span className="text-sm text-right">{t('fastSecure')}</span>
+                  <div className="bg-orange-100 p-2 rounded-full">
+                    <Upload className="w-4 h-4 text-orange-600" />
+                  </div>
                 </div>
-                <span className="text-sm">Smart Matching</span>
+                <div className="flex items-center gap-3 text-gray-600">
+                  <span className="text-sm text-right">{t('available247')}</span>
+                  <div className="bg-blue-100 p-2 rounded-full">
+                    <FileText className="w-4 h-4 text-blue-600" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600">
+                  <span className="text-sm text-right">{t('freeService')}</span>
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <Heart className="w-4 h-4 text-green-600" />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-center">
-              <div className="relative w-80 h-48">
-                {/* Card 1 */}
-                <div 
-                  className="absolute top-0 left-0 w-64 h-36 bg-blue-500 rounded-lg shadow-xl transform z-40"
-                  style={{
-                    animation: 'cardCycle1 12s ease-in-out infinite'
-                  }}
-                >
-                  <div className="p-3 text-white">
-                    <FileText className="w-5 h-5 mb-1" />
-                    <h4 className="font-bold text-sm">1. Report Lost</h4>
-                    <p className="text-xs opacity-90">Fill out simple form</p>
-                  </div>
-                </div>
-                
-                {/* Card 2 */}
-                <div 
-                  className="absolute top-2 left-2 w-64 h-36 bg-green-500 rounded-lg shadow-lg transform z-30"
-                  style={{
-                    animation: 'cardCycle2 12s ease-in-out infinite'
-                  }}
-                >
-                  <div className="p-3 text-white">
-                    <Upload className="w-5 h-5 mb-1" />
-                    <h4 className="font-bold text-sm">2. Upload Found</h4>
-                    <p className="text-xs opacity-90">Share what you found</p>
-                  </div>
-                </div>
-                
-                {/* Card 3 */}
-                <div 
-                  className="absolute top-4 left-4 w-64 h-36 bg-purple-500 rounded-lg shadow-lg transform z-20"
-                  style={{
-                    animation: 'cardCycle3 12s ease-in-out infinite'
-                  }}
-                >
-                  <div className="p-3 text-white">
-                    <Search className="w-5 h-5 mb-1" />
-                    <h4 className="font-bold text-sm">3. Smart Match</h4>
-                    <p className="text-xs opacity-90">AI finds connections</p>
-                  </div>
-                </div>
-                
-                {/* Card 4 */}
-                <div 
-                  className="absolute top-6 left-6 w-64 h-36 bg-orange-400 rounded-lg shadow-lg transform z-10"
-                  style={{
-                    animation: 'cardCycle4 12s ease-in-out infinite'
-                  }}
-                >
-                  <div className="p-3 text-white">
-                    <Heart className="w-5 h-5 mb-1" />
-                    <h4 className="font-bold text-sm">4. Reunite</h4>
-                    <p className="text-xs opacity-90">Get it back safely</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="hidden lg:block space-y-4">
-    <div className="flex items-center gap-3 text-gray-600">
-      <span className="text-sm text-right">Fast & Secure</span>
-      <div className="bg-orange-100 p-2 rounded-full">
-        <Upload className="w-4 h-4 text-orange-600" />
-      </div>
-    </div>
-    <div className="flex items-center gap-3 text-gray-600">
-      <span className="text-sm text-right">24/7 Available</span>
-      <div className="bg-blue-100 p-2 rounded-full">
-        <FileText className="w-4 h-4 text-blue-600" />
-      </div>
-    </div>
-    <div className="flex items-center gap-3 text-gray-600">
-      <span className="text-sm text-right">Free Service</span>
-      <div className="bg-green-100 p-2 rounded-full">
-        <Heart className="w-4 h-4 text-green-600" />
-      </div>
-    </div>
-  </div>
-  </div>
-
-           <div className="text-center mt-6">              
-              {/* Compact Stats */}
+            <div className="text-center mt-6">              
               <div className="flex justify-center items-center gap-8 text-xs">
                 <div className="flex items-center gap-2">
                   <div className="bg-blue-500 p-1 rounded-full">
                     <CheckCircle className="w-3 h-3 text-white" />
                   </div>
                   <span className="text-gray-600">
-                    <span className="font-bold text-blue-600">{stats.total_matched}+</span> Reunited
+                    <span className="font-bold text-blue-600">{stats.total_matched}+</span> {t('reunited')}
                   </span>
                 </div>
                 
@@ -479,7 +476,7 @@ function HomePage() {
                     <FileText className="w-3 h-3 text-white" />
                   </div>
                   <span className="text-gray-600">
-                    <span className="font-bold text-green-600">{stats.total_lost + stats.total_found}+</span> Active
+                    <span className="font-bold text-green-600">{stats.total_lost + stats.total_found}+</span> {t('active')}
                   </span>
                 </div>
                 
@@ -488,12 +485,11 @@ function HomePage() {
                     <Heart className="w-3 h-3 text-white" />
                   </div>
                   <span className="text-gray-600">
-                    <span className="font-bold text-purple-600">{stats.success_rate}%</span> Success
+                    <span className="font-bold text-purple-600">{stats.success_rate}%</span> {t('success')}
                   </span>
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
@@ -529,8 +525,8 @@ function HomePage() {
         <section className="py-12 bg-white">
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">What would you like to do?</h3>
-              <p className="text-gray-600">Choose an option below to get started</p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">{t('whatToDo')}</h3>
+              <p className="text-gray-600">{t('chooseOption')}</p>
             </div>
             
             <div className="flex justify-center">
@@ -554,11 +550,11 @@ function HomePage() {
                       }`} />
                     </div>
                     <div className="text-left">
-                      <div className="font-semibold">Browse Documents</div>
+                      <div className="font-semibold">{t('browseDocuments')}</div>
                       <div className={`text-sm ${
                         activeTab === "browse" ? "text-blue-100" : "text-gray-500"
                       }`}>
-                        View recent reports
+                        {t('viewRecentReports')}
                       </div>
                     </div>
                   </button>
@@ -581,11 +577,11 @@ function HomePage() {
                       }`} />
                     </div>
                     <div className="text-left">
-                      <div className="font-semibold">Report Lost</div>
+                      <div className="font-semibold">{t('reportLost')}</div>
                       <div className={`text-sm ${
                         activeTab === "report-lost" ? "text-red-100" : "text-gray-500"
                       }`}>
-                        Missing document?
+                        {t('missingDocument')}
                       </div>
                     </div>
                   </button>
@@ -608,11 +604,11 @@ function HomePage() {
                       }`} />
                     </div>
                     <div className="text-left">
-                      <div className="font-semibold">Upload Found</div>
+                      <div className="font-semibold">{t('uploadFound')}</div>
                       <div className={`text-sm ${
                         activeTab === "upload-found" ? "text-green-100" : "text-gray-500"
                       }`}>
-                        Found something?
+                        {t('foundSomething')}
                       </div>
                     </div>
                   </button>
@@ -640,12 +636,11 @@ function HomePage() {
   );
 }
 
-export default function App() {
-  return (
-    <Router>
-      <Suspense fallback={<div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>}>
+const AppContent = () => (
+  <Router>
+    <Suspense fallback={<div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/verify" element={<DocumentDetails />} />
@@ -656,7 +651,14 @@ export default function App() {
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/contact" element={<ContactUs />} />
       </Routes>
-      </Suspense>
-    </Router>
+    </Suspense>
+  </Router>
+);
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
