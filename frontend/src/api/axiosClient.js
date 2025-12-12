@@ -6,8 +6,9 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Dynamic base URL based on environment and host
 const getBaseURL = () => {
-  // Always use environment variable first
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
+  const url = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
+  console.log('API Base URL:', url, 'Environment:', import.meta.env.MODE);
+  return url;
 };
 
 const axiosClient = axios.create({
