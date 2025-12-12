@@ -6,18 +6,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Dynamic base URL based on environment and host
 const getBaseURL = () => {
-  // Check if we're in development mode
-  if (import.meta.env.DEV) {
-    return 'http://localhost:8000/api/';
-  }
-  
-  // In production, use the current host
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    return 'http://16.171.30.43:8001/api/';
-  }
-  
-  // Fallback
+  // Always use environment variable first
   return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
 };
 
