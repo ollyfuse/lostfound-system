@@ -1,10 +1,20 @@
 exports.handler = async (event, context) => {
   const { path, httpMethod, headers, body, queryStringParameters } = event;
   
-  // Extract the API path after /.netlify/functions/api
-  const apiPath = path.replace('/.netlify/functions/api', '') || '/';
+  // Handle OPTIONS preflight
+  if (httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      },
+      body: '',
+    };
+  }
   
-  // Build query string if present
+  const apiPath = path.replace('/.netlify/functions/api', '') || '/';
   const queryString = queryStringParameters 
     ? '?' + new URLSearchParams(queryStringParameters).toString()
     : '';
@@ -28,7 +38,7 @@ exports.handler = async (event, context) => {
       statusCode: response.status,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Content-Type': response.headers.get('content-type') || 'application/json',
       },
