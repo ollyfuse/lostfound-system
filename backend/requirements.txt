@@ -10,3 +10,4 @@ Pillow
 django-filter
 requests
 pillow-heif
+whitenoise
