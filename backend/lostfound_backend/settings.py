@@ -171,7 +171,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://172.20.10.5:3000",
-    os.getenv('FRONTEND_URL', 'https://docufind.netlify.app'),
+    os.getenv('FRONTEND_URL', 'https://docufindrwanda.netlify.app'),
 ]
 
 CORS_ALLOW_CREDENTIALS = True
