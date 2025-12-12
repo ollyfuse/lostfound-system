@@ -13,8 +13,8 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.t
 # Production image
 FROM python:3.11-slim
 
-# Create app user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Create app user with specific UID to match host
+RUN groupadd -g 1000 appuser && useradd -u 1000 -g appuser appuser
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,9 +33,10 @@ RUN pip install --no-cache /wheels/*
 # Copy application
 COPY . .
 
-# Create necessary directories
+# Create directories with proper ownership
 RUN mkdir -p /app/staticfiles /app/media /app/logs && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app && \
+    chmod -R 755 /app/logs
 
 # Make entrypoint executable
 RUN chmod +x /app/entrypoint.prod.sh
