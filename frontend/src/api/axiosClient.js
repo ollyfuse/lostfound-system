@@ -6,20 +6,13 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Dynamic base URL based on environment and host
 const getBaseURL = () => {
-  // If in production (Netlify), use direct backend
-  if (window.location.hostname === 'docufindrwanda.netlify.app') {
-    return 'http://16.171.30.43:8001/api/';
-  }
-  
-  // Otherwise use environment variable or localhost
-  const url = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
-  console.log('API Base URL:', url, 'Environment:', import.meta.env.MODE);
-  return url;
+  // Always use environment variable first
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
 };
 
 const axiosClient = axios.create({
   baseURL: getBaseURL(),
-  timeout: 10000,
+  timeout: 30000, // Increase timeout to 30 seconds
 });
 
 // Request interceptor for caching

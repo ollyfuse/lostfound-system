@@ -1,7 +1,6 @@
 exports.handler = async (event, context) => {
-  const { path, httpMethod, headers, body, queryStringParameters } = event;
+  const { path, httpMethod, headers, body, queryStringParameters, isBase64Encoded } = event;
   
-  // Handle OPTIONS preflight
   if (httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -22,6 +21,9 @@ exports.handler = async (event, context) => {
   const backendUrl = `http://16.171.30.43:8001/api${apiPath}${queryString}`;
   
   try {
+    // Handle binary data properly
+    const requestBody = isBase64Encoded ? Buffer.from(body, 'base64') : body;
+    
     const response = await fetch(backendUrl, {
       method: httpMethod,
       headers: {
@@ -29,7 +31,7 @@ exports.handler = async (event, context) => {
         host: undefined,
         'user-agent': undefined,
       },
-      body: httpMethod !== 'GET' && httpMethod !== 'HEAD' ? body : undefined,
+      body: httpMethod !== 'GET' && httpMethod !== 'HEAD' ? requestBody : undefined,
     });
     
     const responseBody = await response.text();
