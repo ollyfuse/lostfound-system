@@ -59,7 +59,7 @@ export default {
   browseDocuments: 'Reba Inyandiko',
   viewRecentReports: 'Reba raporo z\'igihe gito',
   missingDocument: 'Inyandiko yatakaye?',
-  foundSomething: 'Waboze ikintu?',
+  foundSomething: 'Watoye ikintu?',
   
   // Forms - Lost Document Form
   reportLostDesc: 'Tanga amakuru yerekeye inyandiko yawe yatakaye kugira ngo ufashe abandi kuyimenya no kuguhura.',
