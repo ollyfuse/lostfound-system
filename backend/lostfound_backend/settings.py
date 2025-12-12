@@ -164,13 +164,27 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-# CORS Settings
+# CORS Settings - Consolidated
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3000", 
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://172.20.10.5:3000", 
+    "http://172.20.10.5:3000",
+    os.getenv('FRONTEND_URL', 'https://docufind.netlify.app'),
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 # Celery Configuration
@@ -197,3 +211,64 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 MTN_API_USER = os.getenv('MTN_API_USER', '')
 MTN_API_KEY = os.getenv('MTN_API_KEY', '')
 MTN_SUBSCRIPTION_KEY = os.getenv('MTN_SUBSCRIPTION_KEY', '')
+
+
+# Production Security Settings
+if not DEBUG:
+    # HTTPS Security
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if SECURE_SSL_REDIRECT else None
+    
+    # Security Headers
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000 if SECURE_SSL_REDIRECT else 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True if SECURE_SSL_REDIRECT else False
+    SECURE_HSTS_PRELOAD = True if SECURE_SSL_REDIRECT else False
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # Session Security
+    SESSION_COOKIE_SECURE = SECURE_SSL_REDIRECT
+    CSRF_COOKIE_SECURE = SECURE_SSL_REDIRECT
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+    
+     # Database optimizations
+    DATABASES['default']['CONN_MAX_AGE'] = 60
+    DATABASES['default']['OPTIONS'] = {
+        'connect_timeout': 10,
+        'application_name': 'docufind_backend',
+    }
+    
+    # Logging with proper error handling
+    import os
+    LOG_DIR = os.getenv('LOG_DIR', '/app/logs')
+    os.makedirs(LOG_DIR, exist_ok=True)
+    
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+                'style': '{',
+            },
+        },
+        'handlers': {
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': os.path.join(LOG_DIR, 'django.log'),
+                'formatter': 'verbose',
+            },
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            },
+        },
+        'root': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+        },
+    }

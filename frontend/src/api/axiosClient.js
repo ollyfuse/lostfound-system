@@ -14,7 +14,7 @@ const getBaseURL = () => {
   // In production, use the current host
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    return `http://${host}:8000/api/`;
+    return 'http://16.171.30.43:8001/api/';
   }
   
   // Fallback

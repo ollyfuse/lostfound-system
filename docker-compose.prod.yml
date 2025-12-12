@@ -1,0 +1,117 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: docufind_db_prod
+    environment:
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DB: ${SQL_DATABASE}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./backup:/backup
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SQL_USER} -d ${SQL_DATABASE}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "5433:5432"  
+    networks:
+      - docufind_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: docufind_redis_prod
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data_prod:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "6380:6379" 
+    networks:
+      - docufind_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: docufind_backend_prod
+    env_file:
+      - ./backend/.env.production
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+      - ./logs:/app/logs
+    ports:
+      - "8001:8000"  
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - docufind_network
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: docufind_celery_prod
+    env_file:
+      - ./backend/.env.production
+    command: celery -A lostfound_backend worker --loglevel=info --concurrency=2 --max-tasks-per-child=1000
+    volumes:
+      - media_volume:/app/media
+      - ./logs:/app/logs
+    depends_on:
+      - db
+      - redis
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "celery", "-A", "lostfound_backend", "inspect", "ping"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    networks:
+      - docufind_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: docufind_nginx_prod
+    ports:
+      - "8080:80" 
+    volumes:
+      - ./backend/nginx/nginx.prod.conf:/etc/nginx/nginx.conf  
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - docufind_network
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+  static_volume:
+  media_volume:
+
+networks:
+  docufind_network:
+    driver: bridge
