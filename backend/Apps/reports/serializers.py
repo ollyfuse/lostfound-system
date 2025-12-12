@@ -48,7 +48,7 @@ class FoundDocumentPublicSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get("request")
         if obj.image_blurred:
-            return request.build_absolute_uri(obj.image_blurred.url) # type: ignore
+            return f"/.netlify/functions/media{obj.image_blurred.url}"
         return None
 
 class LostDocumentPublicSerializer(serializers.ModelSerializer):
@@ -150,7 +150,7 @@ class FoundDocumentSerializer(serializers.ModelSerializer):
     def get_image_original(self, obj):
         request = self.context.get("request")
         if obj.image_original:
-            return request.build_absolute_uri(obj.image_original.url) # type: ignore
+            return f"/.netlify/functions/media{obj.image_original.url}"
         return None
 
     def create(self, validated_data):
