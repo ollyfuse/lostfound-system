@@ -12,8 +12,9 @@ const getBaseURL = () => {
 
 const axiosClient = axios.create({
   baseURL: getBaseURL(),
-  timeout: 30000, // Increase timeout to 30 seconds
+  timeout: 60000, // 60 seconds for file uploads
 });
+
 
 // Request interceptor for caching
 axiosClient.interceptors.request.use((config) => {
