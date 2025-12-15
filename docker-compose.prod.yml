@@ -66,6 +66,10 @@ services:
       retries: 3
     networks:
       - docufind_network
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
   celery:
     build:
@@ -90,6 +94,10 @@ services:
       retries: 3
     networks:
       - docufind_network
+    deploy:
+      resources:
+        limits:
+          memory: 200M
 
   nginx:
     image: nginx:alpine
