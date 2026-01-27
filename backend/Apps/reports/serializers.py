@@ -71,10 +71,10 @@ class LostDocumentPublicSerializer(serializers.ModelSerializer):
         return mask_name(obj.Owner_name)
     
     def get_image(self, obj):
-        request = self.context.get("request")
         if obj.image:
-            return request.build_absolute_uri(obj.image.url) # type: ignore
+            return f"/.netlify/functions/media{obj.image.url}"
         return None
+
 
     def get_is_premium(self, obj):
         """Check if document has active premium status"""
