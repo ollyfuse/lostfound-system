@@ -32,13 +32,15 @@ def convert_heic_to_jpeg(image_file):
 def make_blurred_copy(image_file):
     image_file.seek(0)
     img = Image.open(image_file).convert("RGB")
-
-    # blur the image moderately
+    
     blurred_img = img.filter(ImageFilter.GaussianBlur(radius=25))
     
     output = BytesIO()
     blurred_img.save(output, format='JPEG', quality=85)
-    return ContentFile(output.getvalue(), name=f"blurred_{image_file.name}")
+    
+    # Extract just the filename, not the full path
+    filename = os.path.basename(image_file.name)
+    return ContentFile(output.getvalue(), name=f"blurred_{filename}")
 
 class DocumentType(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -87,8 +89,11 @@ class LostDocument(models.Model):
         is_new = self.pk is None
         super().save(*args, **kwargs)
         if is_new:
-            from core.tasks import check_and_notify_matches
-            check_and_notify_matches.delay(lost_doc_id=self.id) # type: ignore
+            try:
+                from core.tasks import check_and_notify_matches
+                check_and_notify_matches.delay(lost_doc_id=self.id) # type: ignore
+            except Exception:
+                pass
     
 
 class FoundDocument(models.Model):
@@ -133,8 +138,11 @@ class FoundDocument(models.Model):
             super().save(update_fields=["image_blurred"])
         
         if is_new:
-            from core.tasks import check_and_notify_matches
-            check_and_notify_matches.delay(found_doc_id=self.id) # type: ignore
+            try:
+                from core.tasks import check_and_notify_matches
+                check_and_notify_matches.delay(found_doc_id=self.id) # type: ignore
+            except Exception:
+                pass
 
 class Payment(models.Model):
     PAYMENT_STATUS_CHOICES = [
