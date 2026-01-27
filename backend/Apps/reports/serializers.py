@@ -46,10 +46,19 @@ class FoundDocumentPublicSerializer(serializers.ModelSerializer):
         return mask_name(obj.found_name)
 
     def get_image(self, obj):
-        request = self.context.get("request")
-        if obj.image_blurred:
-            return f"/.netlify/functions/media{obj.image_blurred.url}"
+        if obj.image_blurred and obj.image_blurred.name:
+            # Check if it's a malformed path
+            if 'blurred_/app/' in obj.image_blurred.name:
+                # Fall back to original image for malformed paths
+                if obj.image_original:
+                    return f"/.netlify/functions/media{obj.image_original.url}"
+            else:
+                # Use the blurred image for properly formatted paths
+                return f"/.netlify/functions/media{obj.image_blurred.url}"
+        elif obj.image_original:
+            return f"/.netlify/functions/media{obj.image_original.url}"
         return None
+
 
 class LostDocumentPublicSerializer(serializers.ModelSerializer):
     document_number = serializers.SerializerMethodField()
