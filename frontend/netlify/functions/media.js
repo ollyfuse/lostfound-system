@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
   
   // Extract media path after /.netlify/functions/media
   const mediaPath = path.replace('/.netlify/functions/media', '') || '/';
-  const backendUrl = `http://16.171.30.43:8080${mediaPath}`;
+  const backendUrl = `http://16.171.30.43:8001${mediaPath}`;
   
   try {
     const response = await fetch(backendUrl, {
