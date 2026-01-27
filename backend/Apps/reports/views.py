@@ -29,7 +29,15 @@ class LostDocumentCreateView(generics.ListCreateAPIView):
 
 class FoundDocumentCreateView(generics.ListCreateAPIView):
     queryset = FoundDocument.objects.all().order_by('-created_at')
-    serializer_class = FoundDocumentSerializer
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return FoundDocumentPublicSerializer
+        return FoundDocumentSerializer
+    
+    def get_queryset(self):
+        return FoundDocument.objects.filter(is_removed=False).order_by('-created_at')
+
 
 class LostDocumentListView(generics.ListAPIView):
     serializer_class = LostDocumentPublicSerializer
