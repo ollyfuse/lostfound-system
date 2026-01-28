@@ -33,14 +33,20 @@ def make_blurred_copy(image_file):
     image_file.seek(0)
     img = Image.open(image_file).convert("RGB")
     
-    blurred_img = img.filter(ImageFilter.GaussianBlur(radius=25))
+    # Resize large images to reduce memory usage
+    max_size = (600, 600)  # Smaller size for low-memory server
+    img.thumbnail(max_size, Image.Resampling.LANCZOS)
+    
+    # blur the image moderately  
+    blurred_img = img.filter(ImageFilter.GaussianBlur(radius=15))  # Reduced blur radius
     
     output = BytesIO()
-    blurred_img.save(output, format='JPEG', quality=85)
+    blurred_img.save(output, format='JPEG', quality=70)  # Lower quality to save memory
     
     # Extract just the filename, not the full path
     filename = os.path.basename(image_file.name)
     return ContentFile(output.getvalue(), name=f"blurred_{filename}")
+
 
 class DocumentType(models.Model):
     name = models.CharField(max_length=100, unique=True)
