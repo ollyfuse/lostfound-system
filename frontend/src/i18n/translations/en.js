@@ -127,7 +127,7 @@ export default {
   helpCenter: 'Help Center',
   contactUs: 'Contact Us',
   aboutUs: 'About Us',
-  copyright: '© 2024 DocuFind. All rights reserved.',
+  copyright: '© 2026 DocuFind. All rights reserved.',
   
   // Document Card
   reportedOn: 'Reported on',

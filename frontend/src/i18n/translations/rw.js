@@ -127,7 +127,7 @@ export default {
   helpCenter: 'Ikigo cy\'Ubufasha',
   contactUs: 'Duhure',
   aboutUs: 'Ibibacu',
-  copyright: '© 2024 DocuFind. Uburenganzira bwose burarinzwe.',
+  copyright: '© 2026 DocuFind. Uburenganzira bwose burarinzwe.',
   
   // Document Card
   reportedOn: 'Yatanzwe ku wa',
